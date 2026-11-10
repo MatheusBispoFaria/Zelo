@@ -1,0 +1,39 @@
+# Ambientes, caches e artefatos Python
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+build/
+dist/
+*.egg-info/
+
+# Configurações e credenciais locais
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+.idea/
+.vscode/
+
+# Backup pessoal e bases originais: manter fora do GitHub
+/backup/
+/docs/
+/.cache/
+/data/*.csv
+/data/raw/
+
+# Arquivos temporários e do sistema
+*.log
+*.tmp
+.ipynb_checkpoints/
+.DS_Store
+Thumbs.db
+Desktop.ini
+~$*

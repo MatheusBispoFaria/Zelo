@@ -1,0 +1,1 @@
+# Este arquivo é a unidade central do dashboard, com os outros pys (exceto por home.py e app.py) presentes neste diretório.

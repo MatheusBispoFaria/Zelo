@@ -1,0 +1,1 @@
+# Este arquivo organiza os demais pys, além de ser o responsável por iniciar a aplicação, deixando como default o home.py abrir.
