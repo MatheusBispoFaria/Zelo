@@ -26,7 +26,7 @@ MODALITIES = {'primeira_consulta': 'Primeira consulta', 'interconsulta': 'Interc
 QUARTERS = ['2024-T1', '2024-T2', '2024-T3', '2024-T4', '2025-T1']
 DEFAULTS = {'confidence': .95, 'iqr': False, 'factor': 1.5, 'zeros': False, 'exam': next(iter(EXAMS)),
             'modality': 'primeira_consulta', 'quarter': '2025-T1', 'threshold': 20,
-            'coverage': 80, 'period': '2025-09', 'year': 2025, 'classification': 'acesso'}
+            'coverage': 80, 'period': '2025-09', 'classification': 'acesso'}
 
 
 def field(label, control):
@@ -85,7 +85,6 @@ def layout():
                     field('Limiar exploratório de chuva · mm/dia', choose('analysis-threshold', [10,20,30,50,80], 20)),
                     field('Cobertura mínima diária da estação', choose('analysis-coverage', {50:'50%',80:'80%',90:'90%',100:'100%'}, 80)),
                     field('Chuva e leitos · mesma competência', choose('analysis-period', {'2025-09':'Setembro de 2025','2025-10':'Outubro de 2025'}, '2025-09')),
-                    field('Sinistros · ano observado', choose('analysis-year', {2025:'2025 · ano completo',2026:'2026 · janeiro a setembro'}, 2025)),
                     field('Manifestações · classificação', choose('analysis-classification', {'acesso':'Reclamações e solicitações','todas':'Todas as classificações'}, 'acesso')),
                 ], className='controls-grid'),
             ], className='analysis-recortes'),
@@ -324,15 +323,6 @@ def build_dashboard(config):
     frames['07_regressao_chuva_leitos'] = fit
     report['graficos']['07_chuva_leitos'] = info
 
-    # 8. Contexto territorial de deslocamentos, sem estimativa de duração do trajeto.
-    accidents, info = analysis.mobility(c['year'], enabled, factor)
-    chart = bar_chart(accidents, 'municipio', 'sinistros', 'Sinistros registrados')
-    cards.append(card(8, 'Qual é o contexto dos deslocamentos?',
-        'Informações de mobilidade ajudam a planejar a ida à consulta? Observe os registros do território.', chart,
-        f"Até 12 municípios por número de sinistros em {c['year']}; {info['periodo']}. Contagens não medem o risco por viagem e dependem do volume de circulação. Faltam trajetos e tempos de viagem para avaliar o benefício do Zelo. Sem IC de amostragem para a contagem do acervo.", info, True))
-    frames['08_sinistros_por_municipio'] = accidents
-    report['graficos']['08_mobilidade'] = info
-
     last = wait.iloc[-1] if not wait.empty else None
     stats = html.Div([
         stat('Última espera incluída · capital', f"{last['valor']:.0f} dias" if last is not None else 'Sem recorte',
@@ -346,7 +336,7 @@ def build_dashboard(config):
         html.P('Tempo economizado: tarefas equivalentes com e sem assistente, conclusão e erros. Não há observações de uso do Zelo nestas bases.'),
         html.P('Redução de faltas e reaproveitamento: agendamentos, presença, cancelamentos, reoferta e comparador. As séries públicas são uma referência de contexto.'),
         html.P('Avisos de enchente: ocorrências locais e horários dos avisos para medir acertos, falsos avisos e antecedência. Chuva sozinha não fornece esse resultado.'),
-        html.P('Fila da UPA e deslocamentos: eventos de chegada, triagem e atendimento, trajetos e duração observada. A capacidade hospitalar e os sinistros não substituem esses registros.'),
+        html.P('Fila da UPA: eventos de chegada, triagem e atendimento. O cadastro hospitalar não substitui esses registros.'),
     ], className='hypothesis-gap')
     complementary = popout('analysis-complementary', 'Análises complementares',
                            [html.Div(cards[6:], className='complementary-grid')], 'complementary-dialog')
@@ -387,7 +377,7 @@ def method_section():
         'SP Águas':'https://dadosabertos.sp.gov.br/',
     }
     return popout('fontes', 'Fontes, critérios e limites', [
-        html.P('As tabelas de Saúde, Enchentes e Mobilidade continuam apresentando as bases originais. Conversões numéricas, exclusões de valores inválidos, junções e filtro IQR acontecem somente nas cópias analíticas.'),
+        html.P('As tabelas de Saúde e Enchentes continuam apresentando as bases originais. Conversões numéricas, exclusões de valores inválidos, junções e filtro IQR acontecem somente nas cópias analíticas.'),
         html.P('Regressões temporais usam erros robustos HAC com uma defasagem; a associação municipal usa HC3. As faixas são ICs pontuais da média ajustada dentro dos dados observados. A validade depende das hipóteses do modelo; não são previsões individuais, correção de viés ou efeitos do assistente.', className='description'),
         html.P('A média de faltas usa bootstrap por unidade em uma coorte completa. Seu IC é exploratório e não representa uma taxa ponderada de toda a rede SUS. Rankings de taxas sem denominador e contagens do acervo não recebem margens artificiais.', className='description'),
         html.P('IQR: limites Q1 − k×(Q3−Q1) e Q3 + k×(Q3−Q1). Grupos com menos de quatro valores ou IQR zero são mantidos. Ao ativar o filtro, o IC passa a descrever o recorte filtrado. Não é ajustado para incerteza da seleção de extremos.', className='description'),
@@ -403,8 +393,8 @@ def register_callbacks(app):
                   Input('analysis-confidence','value'), Input('analysis-iqr','value'), Input('analysis-factor','value'),
                   Input('analysis-zeros','value'), Input('analysis-exam','value'), Input('analysis-modality','value'),
                   Input('analysis-quarter','value'), Input('analysis-threshold','value'), Input('analysis-coverage','value'),
-                  Input('analysis-period','value'), Input('analysis-year','value'), Input('analysis-classification','value'))
-    def update(confidence, iqr, factor, zeros, exam, modality, quarter, threshold, coverage, period, year, classification):
+                  Input('analysis-period','value'), Input('analysis-classification','value'))
+    def update(confidence, iqr, factor, zeros, exam, modality, quarter, threshold, coverage, period, classification):
         config = {'confidence':confidence if confidence in (.90,.95,.99) else .95,
                   'iqr':'on' in (iqr or []), 'factor':factor if factor in (1.5,3.0) else 1.5,
                   'zeros':'on' in (zeros or []), 'exam':exam if exam in EXAMS else DEFAULTS['exam'],
@@ -413,7 +403,6 @@ def register_callbacks(app):
                   'threshold':threshold if threshold in (10,20,30,50,80) else 20,
                   'coverage':coverage if coverage in (50,80,90,100) else 80,
                   'period':period if period in ('2025-09','2025-10') else '2025-09',
-                  'year':year if year in (2025,2026) else 2025,
                   'classification':classification if classification in ('acesso','todas') else 'acesso'}
         try:
             content, export = build_dashboard(config)

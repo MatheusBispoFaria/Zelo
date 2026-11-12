@@ -2,16 +2,16 @@
 
 Zelo é a proposta de um assistente virtual para o cidadão, acessado pelo celular,
 com foco no acompanhamento e gerenciamento de consultas no SUS. Módulos de apoio
-incluem avisos sonoros de enchentes e informações para deslocamentos.
+incluem avisos sonoros de enchentes.
 
 O dashboard reúne as bases públicas do estudo de caso, com foco de demonstração
-em São Paulo. Saúde, Enchentes e Mobilidade oferecem tabelas e downloads dos CSVs
-originais. A Visão geral apresenta oito gráficos exploratórios, regressões lineares,
+em São Paulo. Saúde e Enchentes oferecem tabelas e downloads dos CSVs
+originais. A Visão geral apresenta sete gráficos exploratórios, regressões lineares,
 intervalos de confiança e filtros aplicados somente a cópias analíticas.
 
 A Visão geral concentra os seis gráficos principais em um quadro: espera no centro,
 oferta e dificuldades à esquerda, faltas à direita e chuva abaixo. Fontes, tratamentos
-e ampliações ficam nos ícones de informação. Filtros e as duas análises complementares
+e ampliações ficam nos ícones de informação. Filtros e a análise complementar
 abrem em pop-ups. Os rankings laterais mostram seis valores; a ampliação preserva os
 12 valores do ranking completo, sem mudar os recortes exportados.
 
@@ -28,7 +28,6 @@ gs_zelo/
   general.py             gráficos e perguntas do estudo de caso
   health.py              consulta às bases do SUS e de acesso à saúde
   flood.py               consulta às bases municipais de precipitação
-  mobility.py            consulta às bases de frota e sinistros
   simulator.py           demonstração de alerta, mapa e trajeto fictício
   shared/                componentes e acesso aos dados; não são páginas
     components.py
@@ -51,26 +50,26 @@ gs_zelo/
 ```
 
 As páginas são Início (`/`), Visão geral (`/geral`), Saúde (`/saude`),
-Enchentes (`/enchentes`), Mobilidade (`/mobilidade`) e Simulador (`/simulador`). A navegação entre páginas
+Enchentes (`/enchentes`) e Simulador (`/simulador`). A navegação entre páginas
 fica somente no menu lateral. A identidade visual usa verde profundo, fundo creme
 e amarelo; os seletores de bases são campos dentro das páginas.
 
 ## Dados e procedência
 
-Há **650 CSVs compactados**: seis bases anteriores e 644 incorporadas de
+Há **646 CSVs compactados**: duas bases de chuva anteriores e 644 incorporadas de
 `dados_salvar`. A importação também preserva a planilha XLSX, os links de origem,
 os metadados e as evidências da coleta de indicadores. Todos os 990 arquivos
 recebidos nessa pasta têm correspondência registrada no manifesto.
 
 Os CSVs estão em **`.csv.gz`**, com compactação sem perdas: aproximadamente
-**1050.31 MB para 171.68 MB** em conjunto. Nenhuma linha, coluna ou byte
+**459.65 MiB para 94.19 MiB** em conjunto. Nenhuma linha, coluna ou byte
 dos CSVs de origem foi descartado ou corrigido. Cada arquivo foi lido, descompactado
 para conferência e comparado ao original por SHA-256. A pasta pessoal de origem
 permanece intacta. As cópias descompactadas não são necessárias à execução.
 
 | Fonte | Conteúdo incorporado | Abrangência e ressalva principal |
 |---|---|---|
-| [Dados Abertos SP / SP Águas](https://dadosabertos.sp.gov.br/) | Chuva e índices municipais; frota e sinistros | As seis bases anteriores, de competências diferentes |
+| [Dados Abertos SP / SP Águas](https://dadosabertos.sp.gov.br/) | Chuva e índices municipais | Setembro e outubro de 2025 |
 | [SES-SP](https://portaldatransparencia.saude.sp.gov.br/indicadores.php) | Taxas de absenteísmo | 61 unidades ambulatoriais; 2024-T1 a 2025-T1; não é toda a rede SUS |
 | [ObservaSampa](https://dados-abertos-observasampa.prefeitura.sp.gov.br/saude) | Espera por exames e perda primária de consultas | Capital paulista; período e nível territorial variam por indicador |
 | [Ministério da Saúde](https://dadosabertos.saude.gov.br/) | Hospitais/leitos, OuvidorSUS 2 e quatro indicadores de telessaúde | Bases nacionais preservadas; o recorte SP deve ser explícito na análise |
@@ -92,8 +91,7 @@ com seus nomes dentro de `evidencias/`.
 ## Interpretação
 
 Chuva e SPI ajudam a investigar condições associadas a enchentes. Identificar
-locais com alagamentos recorrentes exige também ocorrências observadas. As bases
-de mobilidade são históricas e não informam ônibus em tempo real.
+locais com alagamentos recorrentes exige também ocorrências observadas.
 
 Espera por exame, falta a consulta, vaga não agendada e capacidade hospitalar são
 medidas diferentes. Os extratos não descrevem a fila operacional de uma UPA.
@@ -108,9 +106,9 @@ O plano de perguntas, hipóteses e possíveis visualizações está em
 
 ## Gráficos e tratamentos
 
-`general.py` constrói oito gráficos: espera por exames, ranking de faltas, trajetória
+`general.py` constrói sete gráficos: espera por exames, ranking de faltas, trajetória
 das faltas entre unidades, perda primária, temas de ouvidoria, frequência de chuva,
-associação municipal entre chuva e leitos cadastrados e contagens de sinistros.
+associação municipal entre chuva e leitos cadastrados.
 Eles dão contexto às perguntas selecionadas; o efeito do uso do Zelo ainda exige
 uma avaliação com participantes ou registros operacionais da intervenção.
 
@@ -128,7 +126,7 @@ conferidas; conflitos são separados. Na ouvidoria, linhas iguais são mantidas,
 pois a ausência de identificador não permite declará-las o mesmo evento.
 
 **Nenhum arquivo de `data/` foi corrigido, sobrescrito ou substituído para os gráficos.**
-As consultas de Saúde, Mobilidade e Enchentes continuam lendo as bases originais.
+As consultas de Saúde e Enchentes continuam lendo as bases originais.
 O botão **Baixar recortes e relatório** entrega um ZIP com CSVs derivados, critérios,
 exclusões por gráfico, limites IQR, modelos, nível de confiança e hashes das fontes.
 A documentação detalhada local está em `docs/graficos-metodologia.md`.
@@ -175,3 +173,8 @@ e pode ser removido com o aplicativo fechado.
 `docs/`, `backup/`, `tests/`, caches e CSVs descompactados em `data/` são ignorados
 pelo Git. As verificações em `tests/test_dashboard.py` tratam da leitura dos dados
 e do funcionamento do dashboard e permanecem disponíveis somente no ambiente local.
+Não precisam estar no Git para o aplicativo funcionar.
+
+O módulo de transporte e suas quatro bases foram retirados do projeto ativo.
+Cópias integrais continuam apenas em `backup/transporte_removido_2026-11-12/`,
+ignorado pelo Git; os commits anteriores continuam preservando o histórico.

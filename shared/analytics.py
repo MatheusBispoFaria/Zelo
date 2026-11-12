@@ -278,21 +278,3 @@ def health_rain(period, enabled, factor):
         hospitais_sem_correspondencia_validada=unmatched, duplicadas_clima=duplicate_climate,
         duplicadas_leitos=duplicate_beds, iqr_chuva=rain_iqr, iqr_leitos=beds_iqr,
         interpretacao='Municípios com cadastro hospitalar no mês; leitos SUS cadastrados, sem ajuste populacional. Associação ecológica, sem inferência causal ou espacial ajustada.')
-
-
-@lru_cache(maxsize=3)
-def _mobility_counts(year):
-    df = source('sinistros', ['id_sinistro', 'municipio', 'ano_sinistro'])
-    df = df.loc[df['ano_sinistro'].eq(str(year))].copy()
-    df, identity = unique_records(df, ['id_sinistro'])
-    counts = df['municipio'].replace('', 'MUNICÍPIO NÃO INFORMADO').value_counts().rename_axis('municipio').reset_index(name='sinistros')
-    return counts, identity, len(df)
-
-
-def mobility(year, enabled, factor):
-    counts, identity, total = _mobility_counts(year)
-    counts, info = iqr_filter(counts.copy(), 'sinistros', enabled, factor)
-    return counts, audit(['sinistros'], **identity, **info, ano=year, sinistros_no_ano=total,
-        periodo='Janeiro a dezembro' if year == 2025 else 'Janeiro a setembro; ano incompleto',
-        interpretacao='Contagens por município; sem exposição, população ou informação de trajeto. Não mede risco individual ou economia de tempo.',
-        ic='Contagem do acervo; não é uma amostra de trajetos. IQR, se ativo, atua nas contagens municipais, não nos registros de acidentes.')

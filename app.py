@@ -11,7 +11,6 @@ import flood
 import general
 import health
 import home
-import mobility
 import simulator
 from shared.components import icon
 from shared.data_access import DATA_DIR, DATASETS, metadata
@@ -22,10 +21,9 @@ from shared.simulation import simulate_route
 ROOT = Path(__file__).resolve().parent
 PAGES = {"/": ("Início", home.layout), "/geral": ("Visão geral", general.layout),
          "/saude": ("Saúde e SUS", health.layout), "/enchentes": ("Enchentes", flood.layout),
-         "/mobilidade": ("Mobilidade", mobility.layout), "/simulador": ("Simulador de alerta", simulator.layout)}
+         "/simulador": ("Simulador de alerta", simulator.layout)}
 NAVIGATION = [("/", "Início", "home", "home"), ("/geral", "Visão geral", "general", "general"),
               ("/saude", "Saúde", "health", "health"), ("/enchentes", "Enchentes", "water", "flood"),
-              ("/mobilidade", "Mobilidade", "bus", "mobility"),
               ("/simulador", "Simulador", "alert", "simulator")]
 
 
@@ -91,7 +89,6 @@ def create_app():
         return "app-shell", "true", "Recolher menu lateral"
 
     register_callbacks(application, "flood")
-    register_callbacks(application, "mobility")
     register_callbacks(application, "health")
     general.register_callbacks(application)
 

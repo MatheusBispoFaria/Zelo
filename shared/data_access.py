@@ -22,18 +22,6 @@ DATASETS = {
     "clima-outubro": {"file": "municipio_10_25.csv.gz", "label": "Outubro de 2025",
                       "title": "Precipitação · outubro de 2025", "group": "flood",
                       "period": "Outubro de 2025", "source": "SP Águas"},
-    "sinistros": {"file": "sinistros_2025-2026.csv.gz", "label": "Sinistros",
-                  "title": "Sinistros de trânsito", "group": "mobility",
-                  "period": "Janeiro de 2025 a setembro de 2026", "source": "Governo de São Paulo"},
-    "pessoas": {"file": "pessoas_2025-2026.csv.gz", "label": "Pessoas",
-                "title": "Pessoas envolvidas em sinistros", "group": "mobility",
-                "period": "Janeiro de 2025 a setembro de 2026", "source": "Governo de São Paulo"},
-    "veiculos": {"file": "veiculos_2025-2026.csv.gz", "label": "Veículos",
-                 "title": "Veículos envolvidos em sinistros", "group": "mobility",
-                 "period": "Janeiro de 2025 a setembro de 2026", "source": "Governo de São Paulo"},
-    "frota": {"file": "frota_ativa_sp.csv.gz", "label": "Frota ativa",
-              "title": "Frota ativa do estado de São Paulo", "group": "mobility",
-              "period": "Outubro de 2026", "source": "Governo de São Paulo"},
     "absenteismo": {"file": "saude/indicadores/absenteismo_ambulatorial_ses_sp.csv.gz", "label": "Faltas às consultas",
                      "title": "Absenteísmo em consultas ambulatoriais", "group": "health",
                      "period": "1º trimestre de 2024 ao 1º trimestre de 2025", "source": "SES-SP"},
@@ -148,9 +136,8 @@ def _numeric(column):
         "rain", "rain_max", "rain_min", "rain_avg", "chuva_acumulada", "maximo_historico",
         "minimo_historico", "media_historica", "duracao_seca", "magnitude_seca",
         "max_magnitude_seca", "duracao_seca_em_meses", "temp_media", "temp_media_avg",
-        "temp_max", "temp_max_avg", "temp_min", "temp_min_avg", "idade", "ano_fab",
-        "ano_modelo", "ANO", "MES", "ano_sinistro", "mes_sinistro", "dia_sinistro",
-        "id_sinistro", "id_pessoa", "id_veiculo", "cod_ibge", "ID_MUNICIPIO",
+        "temp_max", "temp_max_avg", "temp_min", "temp_min_avg", "idade",
+        "ANO", "MES", "cod_ibge", "ID_MUNICIPIO",
     })
 
 
@@ -177,9 +164,6 @@ def query_page(key, *, page=0, page_size=25, search="", search_column="__all__",
         params = [f"%{needle}%"] * len(selected)
     if sort_column == "__original__":
         order = "__source_row"
-    elif sort_column in ("data_sinistro", "data_obito"):
-        field = quote(sort_column)
-        order = f"SUBSTR({field}, 7, 4) || SUBSTR({field}, 4, 2) || SUBSTR({field}, 1, 2)"
     elif _numeric(sort_column):
         order = f"CAST(REPLACE(NULLIF(NULLIF({quote(sort_column)}, ''), 'NULL'), ',', '.') AS REAL)"
     else:
