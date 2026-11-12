@@ -15,6 +15,8 @@ e ampliações ficam nos ícones de informação. Filtros e as duas análises co
 abrem em pop-ups. Os rankings laterais mostram seis valores; a ampliação preserva os
 12 valores do ranking completo, sem mudar os recortes exportados.
 
+Todos os campos do painel de filtros ficam abertos, sem seções recolhíveis.
+
 ## Organização
 
 ```text

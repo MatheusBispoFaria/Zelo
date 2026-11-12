@@ -76,8 +76,8 @@ def layout():
             ], className='controls-grid'),
             html.P('IQR atua apenas nas cópias usadas nos gráficos. Extremos podem ser reais, especialmente na chuva. Os ICs descrevem a incerteza das estimativas, sem corrigir falhas de cobertura ou seleção.',
                    className='description analysis-hint'),
-            html.Details([
-                html.Summary('Escolher exames, períodos e recortes'),
+            html.Div([
+                html.H3('Exames, períodos e recortes'),
                 html.Div([
                     field('Exame · capital paulista', choose('analysis-exam', EXAMS, DEFAULTS['exam'])),
                     field('Modalidade de consulta', choose('analysis-modality', MODALITIES, 'primeira_consulta')),
@@ -88,7 +88,7 @@ def layout():
                     field('Sinistros · ano observado', choose('analysis-year', {2025:'2025 · ano completo',2026:'2026 · janeiro a setembro'}, 2025)),
                     field('Manifestações · classificação', choose('analysis-classification', {'acesso':'Reclamações e solicitações','todas':'Todas as classificações'}, 'acesso')),
                 ], className='controls-grid'),
-            ]),
+            ], className='analysis-recortes'),
         ], 'analysis-controls'),
         dcc.Loading(html.Div(id='analysis-content', className='analysis-busy'), color=GREEN, type='circle', delay_show=150,
                     parent_className='analysis-loading-shell', style={'height':'100%'}),
@@ -105,8 +105,8 @@ def figure(x_title='', y_title=''):
                         xaxis_title=x_title, yaxis_title=y_title, hoverlabel={'font_size':12},
                         legend={'orientation':'h','y':-0.24,'x':0,'font':{'size':10}},
                         colorway=[GREEN,YELLOW,'#7d9c89'], uirevision='zelo-analysis')
-    chart.update_xaxes(showgrid=False, zeroline=False, tickfont={'size':10}, title_font={'size':12})
-    chart.update_yaxes(gridcolor='#edf0e9', zeroline=False, tickfont={'size':10}, title_font={'size':12})
+    chart.update_xaxes(showgrid=False, zeroline=False, tickfont={'size':12}, title_font={'size':12})
+    chart.update_yaxes(gridcolor='#edf0e9', zeroline=False, tickfont={'size':12}, title_font={'size':12})
     return chart
 
 

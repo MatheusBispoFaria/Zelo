@@ -44,11 +44,12 @@ def create_app():
                           for href, label, symbol, key in NAVIGATION],
                          className="rail-nav", **{"aria-label": "Navegação lateral"}),
                 html.Div([html.Span("SP", className="state-mark")], className="rail-bottom", title="São Paulo"),
-            ], className="sidebar"),
+            ], id="primary-sidebar", className="sidebar"),
             html.Div([
                 html.Header([
                     html.Div([html.Button(icon("menu"), id="menu-toggle", n_clicks=0, className="menu-button button",
-                                          title="Recolher ou mostrar menu lateral", **{"aria-label": "Alternar menu lateral"}),
+                                          title="Recolher menu lateral", **{"aria-label": "Alternar menu lateral",
+                                                                          "aria-controls": "primary-sidebar", "aria-expanded": "true"}),
                               dcc.Link("Zelo", href="/", className="brand-name"),
                               html.Span("/", className="breadcrumb-divider"),
                               html.Span("Painel do cidadão", className="breadcrumb-section"),
@@ -79,9 +80,12 @@ def create_app():
         rails = ["rail-link active" if href == path else "rail-link" for href, *_ in NAVIGATION]
         return (view(), title, *rails)
 
-    @application.callback(Output("app-shell", "className"), Input("menu-toggle", "n_clicks"))
+    @application.callback(Output("app-shell", "className"), Output("menu-toggle", "aria-expanded"),
+                          Output("menu-toggle", "title"), Input("menu-toggle", "n_clicks"))
     def collapse_menu(clicks):
-        return "app-shell is-compact" if (clicks or 0) % 2 else "app-shell"
+        if (clicks or 0) % 2:
+            return "app-shell is-collapsed", "false", "Mostrar menu lateral"
+        return "app-shell", "true", "Recolher menu lateral"
 
     register_callbacks(application, "flood")
     register_callbacks(application, "mobility")

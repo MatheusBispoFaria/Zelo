@@ -52,8 +52,9 @@ strong { font-weight: 600; }
 .button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #dce7e9;
   border-radius: 4px; background: #fff; color: #31556b; min-height: 35px; padding: 7px 12px; font-size: var(--normal); white-space: nowrap; }
 .button:hover:not(:disabled) { background: #f0f8f5; border-color: #9ecdbf; }
-.menu-button { border: 0; padding: 4px; min-height: 28px; margin-left: -5px; }
-.menu-button .icon { width: 17px; height: 17px; }
+.menu-button { width: 44px; height: 44px; min-width: 44px; min-height: 44px; padding: 9px;
+  margin: 0; border: 1px solid #cddbd1; border-radius: 10px; color: var(--green); }
+.menu-button .icon { width: 24px; height: 24px; }
 .source-link { display: flex; align-items: center; gap: 8px; color: #6b8090; white-space: nowrap; }
 .source-link:hover { color: var(--green-dark); }
 .source-link .icon { width: 14px; height: 14px; }
@@ -271,10 +272,8 @@ a:hover { color: var(--green); }
 .data-table .row-number { border-right-color: var(--line); }
 .table-tools, .table-heading, .table-footer { border-color: var(--line); }
 .search-control, .zelo-select .Select-control { border-color: #d9e1d7; border-radius: 7px; }
-.is-compact { grid-template-columns: 54px minmax(0, 1fr); }
-.is-compact .brand { width: 54px; }
-.is-compact .rail-link { margin-inline: 5px; }
-.is-compact .sidebar { visibility: visible; }
+.app-shell.is-collapsed { grid-template-columns: 0 minmax(0, 1fr); }
+.app-shell.is-collapsed .sidebar { visibility: hidden; pointer-events: none; }
 .analysis-hero { display: flex; justify-content: space-between; gap: 24px; align-items: center; margin-bottom: 24px; }
 .analysis-hero h1 { margin: 8px 0; }
 .analysis-hero p { max-width: 740px; }
@@ -287,9 +286,9 @@ a:hover { color: var(--green); }
 .control-field label { display: block; margin-bottom: 6px; color: var(--muted); font-size: var(--description); }
 .control-field .check-label { display: inline-flex; gap: 8px; align-items: center; min-height: 36px; margin: 0; font-size: var(--normal); }
 .control-field input[type=checkbox] { accent-color: var(--green); width: 15px; height: 15px; }
-.analysis-controls details { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 13px; }
+.analysis-recortes { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 13px; }
 .analysis-controls summary, .chart-audit summary, .hypothesis-gap summary { cursor: pointer; color: var(--green); }
-.analysis-controls details .controls-grid { margin-top: 14px; }
+.analysis-recortes .controls-grid { margin-top: 14px; }
 .analysis-hint { margin-top: 12px; }
 .analysis-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 22px; }
 .stat-card { padding: 17px 20px; border-left: 3px solid var(--yellow); }
@@ -344,7 +343,7 @@ a:hover { color: var(--green); }
 /* Visão geral em um quadro: oferta | espera | faltas, com chuva abaixo. */
 body:has(.general-page) .app-shell { height: 100dvh; min-height: 0; overflow: hidden; }
 body:has(.general-page) .workspace { height: 100dvh; overflow: hidden; }
-body:has(.general-page) .topbar { flex: 0 0 50px; min-height: 50px; padding-block: 7px; }
+body:has(.general-page) .topbar { flex: 0 0 56px; min-height: 56px; padding-block: 4px; }
 body:has(.general-page) .app-footer { display: none; }
 body:has(.general-page) .main-content { max-width: none; flex: 1; min-height: 0; padding: 12px 18px; overflow: hidden; }
 .general-page { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 10px; }
