@@ -340,7 +340,7 @@ a:hover { color: var(--green); }
   .dataset-picker { padding: 16px 14px; }
 }
 
-/* Visão geral em um quadro: oferta | espera | faltas, com chuva abaixo. */
+/* Visão geral: comparação de exames | espera | faltas, com chuva mensal abaixo. */
 body:has(.general-page) .app-shell { height: 100dvh; min-height: 0; overflow: hidden; }
 body:has(.general-page) .workspace { height: 100dvh; overflow: hidden; }
 body:has(.general-page) .topbar { flex: 0 0 56px; min-height: 56px; padding-block: 4px; }
@@ -377,6 +377,7 @@ body:has(.general-page) .main-content { max-width: none; flex: 1; min-height: 0;
 .overview-grid .chart-title-row { flex: 0 0 auto; align-items: center; min-height: 25px; gap: 7px; margin-bottom: 3px; }
 .chart-title-row h2 { flex: 1; min-width: 0; }
 .overview-grid .chart-title-row h2 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.overview-grid .chart-context { flex: 0 0 auto; margin: 0 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .overview-grid .chart-number { padding: 2px 5px; }
 .compact-plot { flex: 1; min-height: 0; min-width: 0; }
 .compact-plot > .dash-graph { height: 100%; min-height: 0; }
@@ -405,10 +406,6 @@ body:has(.general-page) .main-content { max-width: none; flex: 1; min-height: 0;
 .analysis-controls .controls-grid { gap: 18px; }
 .analysis-controls .dialog-body { padding: 22px; }
 .analysis-controls .analysis-hint { margin-top: 16px; }
-.complementary-dialog { width: min(1280px, calc(100vw - 48px)); }
-.complementary-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.complementary-grid .chart-card { display: flex; flex-direction: column; grid-area: auto; height: 420px; padding: 16px; }
-.complementary-grid .chart-title-row { align-items: center; }
 .dialog-body .hypothesis-gap { margin: 0; }
 @media (min-width: 1800px) {
   body:has(.general-page) .main-content { padding: 16px 24px; }
@@ -436,5 +433,4 @@ body:has(.general-page) .main-content { max-width: none; flex: 1; min-height: 0;
   .overview-grid .chart-position-6 { height: 240px; }
   .zelo-dialog { width: calc(100vw - 24px); max-width: calc(100vw - 24px); max-height: calc(100dvh - 24px); }
   .dialog-header, .dialog-body { padding: 16px; }
-  .complementary-grid { grid-template-columns: minmax(0,1fr); }
 }

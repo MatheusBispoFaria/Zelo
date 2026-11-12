@@ -2,8 +2,6 @@
 from functools import lru_cache
 import hashlib
 import json
-import re
-import unicodedata
 
 import numpy as np
 import pandas as pd
@@ -124,7 +122,7 @@ def waiting(indicator, include_zeros, enabled, factor):
         invalidos_retirados=invalid, efeito_zelo_mensuravel=False)
 
 
-def absence(modality, quarter, enabled, factor, confidence):
+def absence(modality, quarter, enabled, factor):
     df = source('absenteismo')
     df = df.loc[df['modalidade_consulta'] == modality].copy()
     df, dedup = unique_records(df, ['unidade_id_portal', 'ano', 'trimestre', 'modalidade_consulta'])
@@ -135,37 +133,60 @@ def absence(modality, quarter, enabled, factor, confidence):
     df['periodo'] = df['ano'] + '-T' + df['trimestre']
     df, info = iqr_filter(df, 'valor', enabled, factor, ['periodo'])
     ranked = df.loc[df['periodo'] == quarter].sort_values('valor', ascending=False).head(12).copy()
-    matrix = df.pivot(index='unidade_id_portal', columns='periodo', values='valor').sort_index(axis=1)
-    # A mesma unidade reamostrada é mantida nos cinco trimestres.
-    cohort = matrix.dropna()
-    means = pd.DataFrame(columns=['periodo', 'media', 'ic_inferior', 'ic_superior', 'unidades'])
-    if len(cohort) >= 5:
-        rng = np.random.default_rng(20261112)
-        values = cohort.to_numpy(dtype=float)
-        idx = rng.integers(0, len(values), size=(2000, len(values)))
-        bootstrap = values[idx].mean(axis=1)
-        alpha = (1-confidence)/2
-        lower, upper = np.quantile(bootstrap, [alpha, 1-alpha], axis=0)
-        means = pd.DataFrame({'periodo': cohort.columns, 'media': values.mean(axis=0),
-                              'ic_inferior': lower, 'ic_superior': upper, 'unidades': len(cohort)})
-    return ranked, means, df, audit(['absenteismo'], **dedup, **info, invalidos_retirados=invalid,
-        modalidade=modality, trimestre_ranking=quarter, coorte_completa_unidades=len(cohort),
-        metodo_ic='Bootstrap percentil por unidade, 2.000 reamostragens, semente 20261112; coorte completa depois dos filtros',
-        nivel_confianca=confidence, medias='Média simples entre as unidades da coorte, não taxa geral de pacientes da rede',
-        limite='Não há denominadores para IC das taxas individuais. IC exploratório da média entre unidades sob hipótese de unidades intercambiáveis; a rede não é amostra aleatória de todo o SUS.')
+    return ranked, df, audit(['absenteismo'], **dedup, **info, invalidos_retirados=invalid,
+        modalidade=modality, trimestre_ranking=quarter,
+        limite='Não há denominadores para IC das taxas individuais.')
 
 
-def primary_loss(enabled, factor):
-    df = source('perda-primaria')
-    df, dedup = unique_records(df, ['indicador_id', 'localidade', 'ano'])
+def absence_modalities(quarter, modalities, enabled, factor, confidence):
+    """Compara modalidades no mesmo trimestre e nas mesmas unidades válidas."""
+    df = source('absenteismo').copy()
+    df['periodo'] = df['ano'] + '-T' + df['trimestre']
+    df = df.loc[df['periodo'].eq(quarter) & df['modalidade_consulta'].isin(modalities)].copy()
+    df, dedup = unique_records(df, ['unidade_id_portal', 'periodo', 'modalidade_consulta'])
     df['valor'] = numeric(df['valor'])
     valid = df['valor'].between(0, 100)
     invalid = int((~valid).sum())
     df = df.loc[valid].copy()
-    df['ano'] = pd.to_numeric(df['ano'])
-    df, info = iqr_filter(df, 'valor', enabled, factor)
-    return df.sort_values('ano'), audit(['perda-primaria'], **dedup, **info, invalidos_retirados=invalid,
-        recorte='Município de São Paulo; 2018–2023; percentual publicado; sem dados de reoferta ou uso do Zelo')
+    df, info = iqr_filter(df, 'valor', enabled, factor, ['modalidade_consulta'])
+    matrix = df.pivot(index='unidade_id_portal', columns='modalidade_consulta', values='valor').reindex(columns=list(modalities))
+    cohort = matrix.dropna().sort_index()
+    included = df.loc[df['unidade_id_portal'].isin(cohort.index)].copy()
+    means = pd.DataFrame(columns=['modalidade', 'media', 'ic_inferior', 'ic_superior', 'unidades'])
+    if not cohort.empty:
+        values = cohort.to_numpy(dtype=float)
+        means = pd.DataFrame({'modalidade':cohort.columns, 'media':values.mean(axis=0), 'unidades':len(cohort)})
+        means['ic_inferior'], means['ic_superior'] = np.nan, np.nan
+        if len(cohort) >= 5:
+            rng = np.random.default_rng(20261112)
+            draws = rng.integers(0, len(values), size=(2000, len(values)))
+            boot = values[draws].mean(axis=1)
+            alpha = (1-confidence)/2
+            means['ic_inferior'], means['ic_superior'] = np.quantile(boot,[alpha,1-alpha],axis=0)
+    return means, included, audit(['absenteismo'], **dedup, **info, invalidos_retirados=invalid,
+        trimestre=quarter, coorte_completa_unidades=len(cohort),
+        unidades_sem_todas_modalidades=int(len(matrix)-len(cohort)),
+        metodo_ic='Bootstrap percentil pareado por unidade, 2.000 reamostragens, semente 20261112; mínimo de cinco unidades',
+        nivel_confianca=confidence, ic_disponivel=len(cohort)>=5,
+        limite='Média simples das taxas das mesmas unidades, não taxa ponderada de pacientes da rede. IC exploratório sob hipótese de unidades intercambiáveis; não mede efeito de lembretes.')
+
+
+def waiting_comparison(indicators, include_zeros, enabled, factor):
+    """Último ano comum de indicadores com a mesma definição agendamento–vaga."""
+    parts, reports = [], []
+    for indicator, label in indicators.items():
+        frame, info = waiting(indicator, include_zeros, enabled, factor)
+        frame['exame'] = label
+        parts.append(frame)
+        reports.append(info)
+    years = set.intersection(*(set(p['ano']) for p in parts)) if parts else set()
+    year = int(max(years)) if years else None
+    rows = pd.concat(parts, ignore_index=True) if parts else pd.DataFrame(columns=['ano','exame','valor'])
+    rows = rows.loc[rows['ano'].eq(year)].copy() if year is not None else rows.iloc[:0].copy()
+    return rows, audit(['espera-exames'], ano_comum=year, indicadores=len(indicators),
+        iqr_ativo=bool(enabled), retiradas_iqr=sum(r['retiradas_iqr'] for r in reports),
+        series_tratadas=reports, recorte='Município de São Paulo; último ano comum após filtros; agendamento até a vaga',
+        limite='Exames prioritários são excluídos: medem solicitação até realização. Sem dispersão ou denominadores, não há IC dos valores anuais publicados.')
 
 
 @lru_cache(maxsize=4)
@@ -239,42 +260,12 @@ def rain(threshold, minimum_coverage, enabled, factor):
         'ic': 'Frequência descritiva de dias observados; dias seriados não são tratados como ensaios independentes para IC binomial.'}
 
 
-def normalized(value):
-    plain = ''.join(c for c in unicodedata.normalize('NFKD', str(value).upper()) if not unicodedata.combining(c))
-    return re.sub(r'[^A-Z0-9]', '', plain)
-
-
-def health_rain(period, enabled, factor):
-    climate_key = 'clima-setembro' if period == '2025-09' else 'clima-outubro'
-    climate = source(climate_key)
-    rename = {'cod_ibge': 'ibge7', 'name': 'municipio', 'nome': 'municipio',
-              'rain': 'chuva_mm', 'chuva_acumulada': 'chuva_mm'}
-    climate = climate.rename(columns=rename)
-    climate, duplicate_climate = unique_records(climate, ['ibge7'])
-    climate['ibge6'] = climate['ibge7'].str[:6]
-    climate['nome_normalizado'] = climate['municipio'].map(normalized)
-    if climate['ibge6'].duplicated().any():raise ValueError('A correspondência de códigos municipais não é unívoca.')
-    beds = source('leitos-2025', ['COMP', 'UF', 'CO_IBGE', 'MUNICIPIO', 'CNES', 'LEITOS_SUS'])
-    beds = beds.loc[beds['UF'].eq('SP') & beds['COMP'].eq(period.replace('-', ''))].copy()
-    beds, duplicate_beds = unique_records(beds, ['CNES', 'COMP'])
-    beds['nome_normalizado'] = beds['MUNICIPIO'].map(normalized)
-    lookup = climate.set_index('ibge6')['nome_normalizado']
-    matched = beds['CO_IBGE'].map(lookup).eq(beds['nome_normalizado'])
-    unmatched = int((~matched).sum())
-    beds = beds.loc[matched].copy()
-    beds['leitos_sus'] = numeric(beds['LEITOS_SUS'])
-    beds = beds.loc[beds['leitos_sus'].ge(0)].copy()
-    aggregate = beds.groupby('CO_IBGE')['leitos_sus'].sum(min_count=1).reset_index()
-    df = climate.merge(aggregate, left_on='ibge6', right_on='CO_IBGE', how='inner', validate='one_to_one')
-    df['chuva_mm'] = numeric(df['chuva_mm'])
-    df = df.loc[df['chuva_mm'].ge(0) & df['leitos_sus'].notna()].copy()
-    df, rain_iqr = iqr_filter(df, 'chuva_mm', enabled, factor)
-    df, beds_iqr = iqr_filter(df, 'leitos_sus', enabled, factor)
-    return df, audit([climate_key, 'leitos-2025'], competencia=period,
-        iqr_ativo=bool(enabled), fator_iqr=float(factor),
-        retiradas_iqr=rain_iqr['retiradas_iqr'] + beds_iqr['retiradas_iqr'],
-        linhas_antes_iqr=rain_iqr['linhas_antes_iqr'], linhas_apos_iqr=len(df),
-        correspondencia='Seis primeiros dígitos do código climático usados apenas quando UF, unicidade e nome municipal normalizado coincidem com o cadastro hospitalar.',
-        hospitais_sem_correspondencia_validada=unmatched, duplicadas_clima=duplicate_climate,
-        duplicadas_leitos=duplicate_beds, iqr_chuva=rain_iqr, iqr_leitos=beds_iqr,
-        interpretacao='Municípios com cadastro hospitalar no mês; leitos SUS cadastrados, sem ajuste populacional. Associação ecológica, sem inferência causal ou espacial ajustada.')
+def rain_monthly(daily):
+    """Frequência mensal em dias-estação válidos, preservando meses sem cobertura."""
+    df = daily.copy()
+    df['mes'] = df['dia'].dt.month
+    monthly = df.groupby('mes').agg(dias_estacao=('dia','count'),
+        dias_acima=('acima_limiar','sum'), estacoes=('estacao','nunique')).reindex(range(1,11))
+    monthly[['dias_estacao','dias_acima','estacoes']] = monthly[['dias_estacao','dias_acima','estacoes']].fillna(0).astype(int)
+    monthly['percentual_dias'] = monthly['dias_acima'].div(monthly['dias_estacao'].replace(0,np.nan))*100
+    return monthly.rename_axis('mes').reset_index()

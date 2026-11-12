@@ -6,13 +6,13 @@ incluem avisos sonoros de enchentes.
 
 O dashboard reúne as bases públicas do estudo de caso, com foco de demonstração
 em São Paulo. Saúde e Enchentes oferecem tabelas e downloads dos CSVs
-originais. A Visão geral apresenta sete gráficos exploratórios, regressões lineares,
+originais. A Visão geral apresenta seis gráficos exploratórios, regressão linear,
 intervalos de confiança e filtros aplicados somente a cópias analíticas.
 
 A Visão geral concentra os seis gráficos principais em um quadro: espera no centro,
-oferta e dificuldades à esquerda, faltas à direita e chuva abaixo. Fontes, tratamentos
-e ampliações ficam nos ícones de informação. Filtros e a análise complementar
-abrem em pop-ups. Os rankings laterais mostram seis valores; a ampliação preserva os
+comparação entre exames e dificuldades à esquerda, faltas à direita e chuva mensal abaixo.
+Fontes, tratamentos e ampliações ficam nos ícones de informação. Os filtros
+abrem em um pop-up. Os rankings laterais mostram seis valores; a ampliação preserva os
 12 valores do ranking completo, sem mudar os recortes exportados.
 
 Todos os campos do painel de filtros ficam abertos, sem seções recolhíveis.
@@ -106,17 +106,31 @@ O plano de perguntas, hipóteses e possíveis visualizações está em
 
 ## Gráficos e tratamentos
 
-`general.py` constrói sete gráficos: espera por exames, ranking de faltas, trajetória
-das faltas entre unidades, perda primária, temas de ouvidoria, frequência de chuva,
-associação municipal entre chuva e leitos cadastrados.
+`general.py` apresenta seis perguntas:
+
+| Gráfico | Pergunta e comparação |
+|---|---|
+| Espera por exames | Como evoluiu a espera de um exame na capital? Série preservada, com regressão e IC |
+| Faltas por unidade | Quais unidades têm maior taxa de faltas no trimestre e na modalidade selecionados? Ranking preservado |
+| Faltas por tipo de consulta | Primeira consulta, interconsulta ou retorno: qual tem a maior média de faltas nas mesmas unidades? Barras com IC exploratório |
+| Comparação entre exames | Qual exame tem maior espera no último ano comum? Mamografia, ressonância e tomografia, sempre medindo agendamento até vaga |
+| Dificuldades de acesso | Quais temas aparecem mais nas manifestações ligadas a SP? Ranking preservado |
+| Chuva por mês | Em quais meses houve mais medições diárias acima do limiar? Janeiro–outubro/2026, com cobertura e denominadores documentados |
+
+Valores das barras e o período de referência aparecem no próprio quadro. Foram
+retiradas as séries de perda primária e evolução média das faltas, o ranking climático
+por estação e a associação chuva/leitos. As respectivas bases de saúde e clima
+continuam disponíveis para consulta. Não há painel de análises complementares.
 Eles dão contexto às perguntas selecionadas; o efeito do uso do Zelo ainda exige
 uma avaliação com participantes ou registros operacionais da intervenção.
 
 O filtro IQR é opcional e começa desligado. É possível escolher 1,5 ou 3 vezes o IQR,
-além de ICs de 90%, 95% ou 99%. As regressões temporais usam OLS com covariância HAC(1)
-e a associação municipal usa HC3. As faixas representam a média ajustada do modelo,
-sem extrapolação. A trajetória de faltas usa IC exploratório por bootstrap de unidades
-em uma coorte completa. Taxas individuais sem denominador e contagens do acervo não
+além de ICs de 90%, 95% ou 99%. A regressão da espera usa OLS com covariância HAC(1).
+A faixa representa a média ajustada do modelo, sem extrapolação. A comparação entre
+modalidades usa IC exploratório por bootstrap pareado das unidades no mesmo trimestre,
+preservando as três modalidades em cada reamostragem. A média simples entre unidades
+não equivale à taxa de pacientes da rede. Taxas individuais sem denominador,
+médias anuais publicadas sem dispersão e contagens do acervo não
 recebem margens artificiais.
 
 Os recortes convertem valores para números e retiram registros inválidos somente
