@@ -1,75 +1,149 @@
 # Zelo
 
-Protótipo de dashboard para apoiar o cidadão na análise de condições associadas a
-enchentes e no planejamento de deslocamentos. A versão atual permite consultar as bases em tabelas interativas.
+Zelo é a proposta de um assistente virtual para o cidadão, acessado pelo celular,
+com foco no acompanhamento e gerenciamento de consultas no SUS. Módulos de apoio
+incluem avisos sonoros de enchentes e informações para deslocamentos.
 
-## Dados
+O dashboard reúne as bases públicas do estudo de caso, com foco de demonstração
+em São Paulo. Saúde, Enchentes e Mobilidade oferecem tabelas e downloads dos CSVs
+originais. A Visão geral apresenta oito gráficos exploratórios, regressões lineares,
+intervalos de confiança e filtros aplicados somente a cópias analíticas.
 
-Todos os dados utilizados foram extraídos de bases públicas do Governo do Estado
-de São Paulo, disponibilizadas no [Portal de Dados Abertos SP](https://dadosabertos.sp.gov.br/).
+A Visão geral concentra os seis gráficos principais em um quadro: espera no centro,
+oferta e dificuldades à esquerda, faltas à direita e chuva abaixo. Fontes, tratamentos
+e ampliações ficam nos ícones de informação. Filtros e as duas análises complementares
+abrem em pop-ups. Os rankings laterais mostram seis valores; a ampliação preserva os
+12 valores do ranking completo, sem mudar os recortes exportados.
 
-As seis bases atuais estão em `data/`, no formato **CSV compactado com gzip
-(`.csv.gz`)**. A compactação preserva integralmente o conteúdo dos CSVs originais,
-com redução do volume total de 568,6 MB para 73,0 MB. Não houve amostragem ou
-exclusão de linhas e colunas.
+## Organização
 
-Os CSVs sem compactação ficam em `backup/`, apenas como cópia pessoal. Essa pasta
-é ignorada pelo Git e não deve ser enviada ao GitHub. Os arquivos `.csv.gz` já
-contêm os dados completos necessários à leitura; o backup não é uma dependência.
+```text
+gs_zelo/
+  app.py                 entrada da aplicação e navegação
+  home.py                apresentação do Zelo
+  general.py             gráficos e perguntas do estudo de caso
+  health.py              consulta às bases do SUS e de acesso à saúde
+  flood.py               consulta às bases municipais de precipitação
+  mobility.py            consulta às bases de frota e sinistros
+  shared/                componentes e acesso aos dados; não são páginas
+    components.py
+    data_access.py
+    data_view.py
+    analytics.py         recortes e métodos estatísticos, sem escrever nas bases
+  assets/                estilos da interface
+  data/                  bases compactadas, fontes e manifesto de integridade
+    clima/inmet/2026/    estações de todas as UFs, separadas por UF
+    clima/precipitacao_mg/
+    saude/indicadores/
+    saude/hospitais_leitos/
+    saude/ouvidorsus/
+    saude/telessaude/
+    fontes/
+  docs/                  estudo e perguntas de pesquisa; somente local
+  tests/                 verificações técnicas; somente local
+  backup/                cópias pessoais; somente local
+```
 
-Os tamanhos, hashes de integridade e formatos de leitura estão em
-[data/manifest.json](data/manifest.json). A pasta `docs/` contém anotações
-locais e também é ignorada pelo Git.
+As páginas são Início (`/`), Visão geral (`/geral`), Saúde (`/saude`),
+Enchentes (`/enchentes`) e Mobilidade (`/mobilidade`). A navegação entre páginas
+fica somente no menu lateral. A identidade visual usa verde profundo, fundo creme
+e amarelo; os seletores de bases são campos dentro das páginas.
 
-## Chuva e enchentes
+## Dados e procedência
 
-As bases climáticas foram obtidas na [SP Águas, no Portal de Dados Abertos SP](https://dadosabertos.sp.gov.br/dataset/?organization=agencia-de-aguas-do-estado-de-sao-paulo-sp-aguas&res_format=CSV).
-Entre as referências de setembro de 2025 estão o
-[Índice de Precipitação Padronizado (SPI)](https://dadosabertos.sp.gov.br/dataset/indice-de-precipitacao-padronizado-setembro-de-2025)
-e a [Chuva Acumulada](https://dadosabertos.sp.gov.br/dataset/chuva-acumulada-setembro-de-2025).
-O arquivo `municipio_09.csv.gz` corresponde a setembro de 2025, conforme a origem
-informada pelo responsável pelo projeto; `municipio_10_25.csv.gz` contém a data
-de referência de outubro de 2025.
+Há **650 CSVs compactados**: seis bases anteriores e 644 incorporadas de
+`dados_salvar`. A importação também preserva a planilha XLSX, os links de origem,
+os metadados e as evidências da coleta de indicadores. Todos os 990 arquivos
+recebidos nessa pasta têm correspondência registrada no manifesto.
 
-Esses indicadores permitem estudar o volume de chuva e as anomalias em relação
-ao histórico, apoiando a investigação de condições associadas a possíveis
-enchentes. O projeto ainda não possui um modelo validado para estimar a
-probabilidade de uma enchente ou prever sua ocorrência em um endereço e horário.
+Os CSVs estão em **`.csv.gz`**, com compactação sem perdas: aproximadamente
+**1050.31 MB para 171.68 MB** em conjunto. Nenhuma linha, coluna ou byte
+dos CSVs de origem foi descartado ou corrigido. Cada arquivo foi lido, descompactado
+para conferência e comparado ao original por SHA-256. A pasta pessoal de origem
+permanece intacta. As cópias descompactadas não são necessárias à execução.
 
-## Mobilidade
+| Fonte | Conteúdo incorporado | Abrangência e ressalva principal |
+|---|---|---|
+| [Dados Abertos SP / SP Águas](https://dadosabertos.sp.gov.br/) | Chuva e índices municipais; frota e sinistros | As seis bases anteriores, de competências diferentes |
+| [SES-SP](https://portaldatransparencia.saude.sp.gov.br/indicadores.php) | Taxas de absenteísmo | 61 unidades ambulatoriais; 2024-T1 a 2025-T1; não é toda a rede SUS |
+| [ObservaSampa](https://dados-abertos-observasampa.prefeitura.sp.gov.br/saude) | Espera por exames e perda primária de consultas | Capital paulista; período e nível territorial variam por indicador |
+| [Ministério da Saúde](https://dadosabertos.saude.gov.br/) | Hospitais/leitos, OuvidorSUS 2 e quatro indicadores de telessaúde | Bases nacionais preservadas; o recorte SP deve ser explícito na análise |
+| [INMET](https://portal.inmet.gov.br/dadoshistoricos) | 634 estações horárias de 2026 | Brasil; 41 estações em SP; janeiro a outubro de 2026, com lacunas de medição |
+| Camada de precipitação média anual de MG | XLSX original | Minas Gerais; origem específica pendente de confirmação; sete geometrias truncadas |
 
-As bases disponíveis tratam de frota e sinistros históricos. O projeto ainda não
-possui uma fonte integrada de localização de ônibus em tempo real.
+Os dez CSVs de saúde estão disponíveis nas tabelas de Saúde.
+Os 634 CSVs do INMET estão preservados em `data/clima/inmet/2026/`, com seus
+cabeçalhos originais de estação. A Visão geral utiliza as 41 estações de SP, com
+cobertura mínima selecionável e totais diários UTC apenas quando há 24 horas válidas.
+A planilha de MG permanece preservada para avaliação e não entra nos gráficos de SP.
 
-## Executar o dashboard
+`data/manifest.json` registra os caminhos, formatos de leitura, quantidade de
+registros e hashes. `data/fontes/links_origem.txt` preserva o TXT recebido.
+`data/fontes/coleta_indicadores/` mantém os filtros e os metadados das três
+bases de indicadores coletadas dos portais; `evidencias.zip` guarda as respostas originais
+com seus nomes dentro de `evidencias/`.
 
-Com Python 3.11 ou superior, a partir da pasta do projeto:
+## Interpretação
+
+Chuva e SPI ajudam a investigar condições associadas a enchentes. Identificar
+locais com alagamentos recorrentes exige também ocorrências observadas. As bases
+de mobilidade são históricas e não informam ônibus em tempo real.
+
+Espera por exame, falta a consulta, vaga não agendada e capacidade hospitalar são
+medidas diferentes. Os extratos não descrevem a fila operacional de uma UPA.
+Os valores originais, incluindo zeros e percentuais fora da faixa esperada,
+continuam preservados para revisão. As bases contextualizam problemas; medir
+tempo economizado ou outro efeito do Zelo exige dados de sua utilização e um
+desenho de avaliação. Intervalos de confiança dependem dos dados necessários
+ao parâmetro e ao método escolhido.
+
+O plano de perguntas, hipóteses e possíveis visualizações está em
+`docs/README.md`, mantido apenas no computador por escolha do responsável.
+
+## Gráficos e tratamentos
+
+`general.py` constrói oito gráficos: espera por exames, ranking de faltas, trajetória
+das faltas entre unidades, perda primária, temas de ouvidoria, frequência de chuva,
+associação municipal entre chuva e leitos cadastrados e contagens de sinistros.
+Eles dão contexto às perguntas selecionadas; o efeito do uso do Zelo ainda exige
+uma avaliação com participantes ou registros operacionais da intervenção.
+
+O filtro IQR é opcional e começa desligado. É possível escolher 1,5 ou 3 vezes o IQR,
+além de ICs de 90%, 95% ou 99%. As regressões temporais usam OLS com covariância HAC(1)
+e a associação municipal usa HC3. As faixas representam a média ajustada do modelo,
+sem extrapolação. A trajetória de faltas usa IC exploratório por bootstrap de unidades
+em uma coorte completa. Taxas individuais sem denominador e contagens do acervo não
+recebem margens artificiais.
+
+Os recortes convertem valores para números e retiram registros inválidos somente
+da análise. Os zeros publicados de espera são opcionais e começam excluídos até
+esclarecer sua interpretação. Repetições com chave de evento confirmada são
+conferidas; conflitos são separados. Na ouvidoria, linhas iguais são mantidas,
+pois a ausência de identificador não permite declará-las o mesmo evento.
+
+**Nenhum arquivo de `data/` foi corrigido, sobrescrito ou substituído para os gráficos.**
+As consultas de Saúde, Mobilidade e Enchentes continuam lendo as bases originais.
+O botão **Baixar recortes e relatório** entrega um ZIP com CSVs derivados, critérios,
+exclusões por gráfico, limites IQR, modelos, nível de confiança e hashes das fontes.
+A documentação detalhada local está em `docs/graficos-metodologia.md`.
+
+## Executar
+
+Com Python 3.11 ou superior:
 
 ```sh
 python -m pip install -r requirements.txt
 python app.py
 ```
 
-Abra [http://127.0.0.1:8050](http://127.0.0.1:8050). O comando funciona também quando
-`app.py` é executado por caminho absoluto a partir de outra pasta.
+Abra [http://127.0.0.1:8050](http://127.0.0.1:8050). A execução também funciona
+por caminho absoluto a partir de outra pasta. Textos normais usam 12 px,
+descrições 10 px e títulos 16 px.
 
-O painel possui as páginas Início, Enchentes e Mobilidade. As duas áreas de dados
-permitem escolher o arquivo, buscar registros, ordenar campos, percorrer todas as
-páginas e baixar o CSV completo. Nenhum gráfico ou estimativa é apresentado nesta etapa.
-Textos normais usam 12 px, descrições usam 10 px e títulos usam 16 px.
+A primeira consulta de uma base prepara um cache local em `.cache/`. A tabela
+permite buscar, ordenar, paginar e baixar o CSV integral. O cache é descartável
+e pode ser removido com o aplicativo fechado.
 
-A primeira consulta de cada arquivo prepara um cache local em `.cache/`. As próximas
-consultas reutilizam esse cache, sem carregar milhões de registros no navegador.
-A pasta é ignorada pelo Git e pode ser apagada com o aplicativo fechado; será recriada
-quando necessário. Os dados brutos continuam sendo os arquivos `data/*.csv.gz`.
-
-Intervalos de confiança poderão acompanhar estimativas estatísticas depois da escolha
-do parâmetro, do método e da avaliação de suas hipóteses. Para prever uma ocorrência
-futura, será necessário avaliar a incerteza de predição do modelo. Nenhum intervalo
-foi calculado ou atribuído aos registros originais nesta etapa de consulta.
-
-## Verificações
-
-```sh
-python -m unittest discover -s tests
-```
+`docs/`, `backup/`, `tests/`, caches e CSVs descompactados em `data/` são ignorados
+pelo Git. As verificações em `tests/test_dashboard.py` tratam da leitura dos dados
+e do funcionamento do dashboard e permanecem disponíveis somente no ambiente local.

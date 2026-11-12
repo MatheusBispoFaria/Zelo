@@ -62,6 +62,11 @@ strong { font-weight: 600; }
 .top-tab .icon { width: 15px; height: 15px; opacity: .8; }
 .top-tab:hover { color: var(--green-dark); background: #f9fcfb; }
 .top-tab.active { color: #236783; border-color: #3aa6ac; font-weight: 600; }
+.top-tabs { overflow-x: auto; }
+.top-tab { flex: 0 0 auto; white-space: nowrap; }
+.general-intro { padding: 22px 24px; margin-bottom: 24px; }
+.general-intro p { margin-top: 5px; }
+.general-page > .data-page { margin-bottom: 26px; }
 .main-content { flex: 1; background: var(--surface); padding: 26px; min-width: 0; outline: none; }
 .panel { background: #fff; border: 1px solid #e7edf2; box-shadow: 0 1px 3px #29465f03; }
 .welcome-panel { padding: 30px 32px 32px; }
@@ -174,7 +179,7 @@ strong { font-weight: 600; }
   .topbar { padding: 10px 15px; min-height: 64px; }
   .breadcrumb { gap: 9px; }
   .breadcrumb-section, .source-link { display: none; }
-  .top-tabs { padding: 0 6px; gap: 0; justify-content: space-around; height: 48px; }
+  .top-tabs { padding: 0 6px; gap: 0; justify-content: flex-start; height: 48px; }
   .top-tab { padding: 0 10px; gap: 6px; height: 48px; }
   .top-tab .icon { width: 13px; height: 13px; }
   .main-content { padding: 15px 12px; }
@@ -204,4 +209,233 @@ strong { font-weight: 600; }
   .record-range { width: 100%; text-align: center; }
   .page-size { margin: 0; }
   .is-collapsed { grid-template-columns: 0 minmax(0, 1fr); }
+}
+
+/* Identidade Zelo: verde profundo, papel claro e amarelo quente. */
+:root {
+  --navy: #0c2925; --green: #105d57; --green-dark: #0a4a45;
+  --ink: #192a25; --muted: #53675f; --line: #e3e8e0;
+  --surface: #faf9f5; --yellow: #f5bd4f;
+}
+html { background: var(--surface); }
+body::before, body::after { display: none; }
+body { color: var(--ink); }
+h1, h2, h3 { color: var(--ink); }
+h1 { font-family: Georgia, 'Times New Roman', serif; font-weight: 700; }
+h1 em { color: var(--green); }
+a:hover { color: var(--green); }
+.app-shell { grid-template-columns: 72px minmax(0, 1fr); width: 100%; max-width: none; margin: 0;
+  min-height: 100vh; border: 0; box-shadow: none; background: var(--surface); }
+.sidebar { position: sticky; top: 0; height: 100vh; background: var(--navy); z-index: 30; }
+.brand { width: 72px; height: 66px; }
+.brand-mark { border-radius: 11px; width: 36px; height: 36px; background: var(--yellow); color: var(--navy); }
+.brand-mark::after { display: none; }
+.rail-nav { gap: 12px; margin-top: 20px; }
+.rail-link { height: 46px; margin: 0 12px; border-radius: 12px; }
+.rail-link:hover { background: #ffffff16; }
+.rail-link.active { background: var(--yellow); }
+.rail-link.active::before { display: none; }
+.rail-link.active .icon { filter: brightness(0); }
+.state-mark { color: #f5f5de; border-color: #e9efdf44; }
+.workspace { background: var(--surface); }
+.topbar { min-height: 56px; background: var(--surface); border-bottom: 1px solid var(--line); padding: 10px 32px; }
+.breadcrumb, #breadcrumb-current { color: var(--muted); }
+.brand-name { color: var(--green); }
+.main-content { width: 100%; max-width: 1600px; margin: 0 auto; padding: 30px 36px 40px; background: var(--surface); }
+.panel { border-color: #e1e6df; box-shadow: none; border-radius: 14px; }
+.welcome-panel { padding: 30px; border-top: 4px solid var(--yellow); }
+.eyebrow { color: var(--green); letter-spacing: .08em; text-transform: uppercase; }
+.status-dot { background: var(--yellow); }
+.home-description { margin-top: 12px; }
+.area-card { border-radius: 13px; border-color: var(--line); }
+.area-card:hover { border-color: #9dbbb0; background: #fcfdf9; }
+.area-symbol { background: #edf4ed; border-color: #e0eade; }
+.area-action { color: var(--green); border-top-color: var(--line); }
+.step-number { color: var(--green); background: #fff8e8; border-color: #efdcae; }
+.small-badge { color: var(--green); background: #f1f5ec; border-color: #dfe7d7; border-radius: 20px; }
+.app-footer { border-top-color: var(--line); background: var(--surface); }
+.button { border-color: #d7e1d9; border-radius: 8px; color: var(--green); }
+.button:hover:not(:disabled) { background: #eef4ed; border-color: #a3beb1; }
+.button-primary { background: var(--green); color: #fff; border-color: var(--green); border-radius: 22px; }
+.button-primary:hover:not(:disabled) { background: var(--green-dark); color: white; }
+.menu-button { background: transparent; }
+.page-symbol { background: #edf3e9; border-color: #dce6d9; border-radius: 12px; }
+.dataset-picker { padding: 18px 24px; border-bottom: 1px solid var(--line); background: #fbfcf8; border-radius: 14px 14px 0 0; }
+.dataset-picker label { display: block; margin-bottom: 6px; color: var(--muted); font-size: var(--description); }
+.dataset-select { max-width: 560px; }
+.data-panel { overflow: visible; }
+.data-table th, .data-table th.row-number { background: #f1f4ed; color: #354f42; border-color: #dce4d8; }
+.data-table td { color: #3e5549; border-bottom-color: #edf0e9; }
+.data-table tbody tr:nth-child(even) td { background: #fafbf7; }
+.data-table tbody tr:hover td { background: #eff5e9; }
+.data-table .row-number { border-right-color: var(--line); }
+.table-tools, .table-heading, .table-footer { border-color: var(--line); }
+.search-control, .zelo-select .Select-control { border-color: #d9e1d7; border-radius: 7px; }
+.is-compact { grid-template-columns: 54px minmax(0, 1fr); }
+.is-compact .brand { width: 54px; }
+.is-compact .rail-link { margin-inline: 5px; }
+.is-compact .sidebar { visibility: visible; }
+.analysis-hero { display: flex; justify-content: space-between; gap: 24px; align-items: center; margin-bottom: 24px; }
+.analysis-hero h1 { margin: 8px 0; }
+.analysis-hero p { max-width: 740px; }
+.study-tag { display: inline-flex; gap: 7px; align-items: center; padding: 4px 10px; border: 1px solid #e1e5da;
+  border-radius: 20px; background: #fff; font-size: var(--description); color: var(--green); }
+.study-tag::before { content: ''; background: var(--yellow); width: 6px; height: 6px; border-radius: 50%; }
+.analysis-controls { padding: 20px 22px; margin-bottom: 22px; }
+.controls-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+.controls-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; align-items: end; }
+.control-field label { display: block; margin-bottom: 6px; color: var(--muted); font-size: var(--description); }
+.control-field .check-label { display: inline-flex; gap: 8px; align-items: center; min-height: 36px; margin: 0; font-size: var(--normal); }
+.control-field input[type=checkbox] { accent-color: var(--green); width: 15px; height: 15px; }
+.analysis-controls details { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 13px; }
+.analysis-controls summary, .chart-audit summary, .hypothesis-gap summary { cursor: pointer; color: var(--green); }
+.analysis-controls details .controls-grid { margin-top: 14px; }
+.analysis-hint { margin-top: 12px; }
+.analysis-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 22px; }
+.stat-card { padding: 17px 20px; border-left: 3px solid var(--yellow); }
+.stat-value { display: block; color: var(--green); font: 700 var(--title)/1.5 Georgia, serif; margin: 4px 0; }
+.stat-label { color: var(--muted); font-size: var(--description); }
+.chart-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+.chart-card { min-width: 0; padding: 22px 22px 15px; background: #fff; border: 1px solid #e1e6df; border-radius: 14px; }
+.chart-card.chart-wide { grid-column: 1 / -1; }
+.chart-number { color: var(--green); background: #fff5dc; padding: 3px 8px; border-radius: 5px; font-size: var(--description); }
+.chart-title-row { display: flex; gap: 10px; align-items: start; margin-bottom: 8px; }
+.chart-card h2 { font-size: var(--title); line-height: 1.45; }
+.chart-question { color: var(--muted); font-size: var(--description); min-height: 35px; margin-bottom: 12px; }
+.chart-card .dash-graph { min-width: 0; width: 100%; }
+.chart-caption { font-size: var(--description); color: #53675f; border-top: 1px solid var(--line); padding-top: 12px; line-height: 1.75; }
+.chart-audit { padding-top: 10px; font-size: var(--description); color: var(--muted); }
+.chart-audit ul { padding-left: 17px; margin: 8px 0; overflow-wrap: anywhere; }
+.hypothesis-gap { margin-top: 22px; padding: 18px 22px; background: #fff7e6; border: 1px solid #efdaac; border-radius: 12px; }
+.hypothesis-gap p { margin: 10px 0; }
+.method-section { margin-top: 24px; padding: 24px; }
+.method-section h2 { margin-bottom: 10px; }
+.method-section p { margin: 8px 0; }
+.method-links { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.method-links a { text-decoration: underline; text-underline-offset: 3px; color: var(--green); }
+.analysis-busy { min-height: 400px; }
+.error-note { padding: 20px; border: 1px solid #dfbdb0; border-radius: 12px; background: #fff3ef; }
+@media (min-width: 1600px) { .main-content { padding-top: 40px; } }
+@media (max-width: 1100px) {
+  .controls-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .chart-grid { grid-template-columns: minmax(0, 1fr); }
+  .chart-card.chart-wide { grid-column: auto; }
+  .main-content { padding: 24px; }
+}
+@media (max-width: 700px) {
+  .app-shell { grid-template-columns: 54px minmax(0, 1fr); }
+  .brand { width: 54px; }
+  .rail-link { margin-inline: 5px; height: 43px; }
+  .topbar { padding: 9px 14px; min-height: 50px; }
+  .main-content { padding: 20px 12px; }
+  .analysis-hero { align-items: start; flex-direction: column; gap: 14px; }
+  .controls-heading { align-items: start; flex-direction: column; }
+  .analysis-controls, .chart-card { padding: 17px 13px; }
+  .controls-grid, .analysis-stats { grid-template-columns: minmax(0, 1fr); }
+  .analysis-stats { gap: 9px; }
+  .stat-card { padding: 12px 16px; }
+  .chart-grid { gap: 16px; }
+  .chart-title-row { gap: 8px; }
+  .chart-question { min-height: 0; }
+  .hypothesis-gap, .method-section { padding: 18px 14px; }
+  .dataset-picker { padding: 16px 14px; }
+}
+
+/* Visão geral em um quadro: oferta | espera | faltas, com chuva abaixo. */
+body:has(.general-page) .app-shell { height: 100dvh; min-height: 0; overflow: hidden; }
+body:has(.general-page) .workspace { height: 100dvh; overflow: hidden; }
+body:has(.general-page) .topbar { flex: 0 0 50px; min-height: 50px; padding-block: 7px; }
+body:has(.general-page) .app-footer { display: none; }
+body:has(.general-page) .main-content { max-width: none; flex: 1; min-height: 0; padding: 12px 18px; overflow: hidden; }
+.general-page { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 10px; }
+.general-page .analysis-hero { flex: 0 0 36px; min-height: 36px; margin: 0; gap: 14px; }
+.overview-heading { display: flex; align-items: baseline; gap: 14px; min-width: 0; }
+.overview-heading h1 { margin: 0; white-space: nowrap; }
+.overview-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.overview-actions .button { min-height: 30px; padding: 5px 12px; }
+.analysis-loading-shell { flex: 1; min-height: 0; width: 100%; }
+.analysis-loading-shell > div { height: 100%; }
+.general-page .analysis-busy { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.general-page .analysis-stats { flex: 0 0 37px; display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 10px; margin: 0; }
+.general-page .stat-card { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 5px 12px;
+  border-radius: 9px; border-left-width: 2px; }
+.general-page .stat-value { margin: 0; white-space: nowrap; }
+.general-page .stat-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.general-page .stat-card .description { display: none; }
+.general-page .stat-card:first-child .description { display: block; margin-left: auto; white-space: nowrap; }
+.general-page .overview-grid { display: grid; flex: 1; min-height: 0; gap: 10px;
+  grid-template-columns: minmax(220px, 1fr) minmax(340px, 1.55fr) minmax(220px, 1fr);
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) minmax(135px, .85fr);
+  grid-template-areas: 'offer waiting absence' 'topics waiting trend' 'rain rain rain'; }
+.chart-position-1 { grid-area: waiting; }
+.chart-position-2 { grid-area: absence; }
+.chart-position-3 { grid-area: trend; }
+.chart-position-4 { grid-area: offer; }
+.chart-position-5 { grid-area: topics; }
+.chart-position-6 { grid-area: rain; }
+.overview-grid .chart-card { display: flex; flex-direction: column; min-height: 0; padding: 9px 11px 7px;
+  border-radius: 12px; overflow: hidden; }
+.overview-grid .chart-title-row { flex: 0 0 auto; align-items: center; min-height: 25px; gap: 7px; margin-bottom: 3px; }
+.chart-title-row h2 { flex: 1; min-width: 0; }
+.overview-grid .chart-title-row h2 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.overview-grid .chart-number { padding: 2px 5px; }
+.compact-plot { flex: 1; min-height: 0; min-width: 0; }
+.compact-plot > .dash-graph { height: 100%; min-height: 0; }
+.info-button { display: inline-grid; place-items: center; flex: 0 0 auto; width: 25px; height: 25px; border-radius: 50%;
+  border: 1px solid #ceded4; background: #f3f7f0; color: var(--green); font: 700 16px/1 Georgia, serif; padding: 0; }
+.info-button:hover { background: #e6f0e4; border-color: #85aa97; }
+.zelo-dialog { width: min(980px, calc(100vw - 48px)); max-width: calc(100vw - 48px); max-height: calc(100dvh - 48px);
+  padding: 0; border: 1px solid #cfdbd1; border-radius: 16px; background: #fff; color: var(--ink);
+  box-shadow: 0 20px 80px #0c292530; overflow: hidden; }
+.zelo-dialog[open] { display: flex; flex-direction: column; }
+.zelo-dialog::backdrop { background: #0c292555; backdrop-filter: blur(3px); }
+.dialog-header { display: flex; justify-content: space-between; align-items: center; gap: 18px;
+  padding: 16px 22px; border-bottom: 1px solid var(--line); flex-shrink: 0; background: #fafbf7; }
+.dialog-close { display: grid; place-items: center; width: 30px; height: 30px; border: 1px solid #d7e1d7;
+  border-radius: 50%; background: white; font: 400 20px/1 'Segoe UI',sans-serif; color: var(--green); }
+.dialog-body { padding: 20px 22px; overflow: auto; overscroll-behavior: contain; }
+.dialog-body p { margin: 0 0 13px; }
+.dialog-body .chart-caption { font-size: 12px; padding: 0; border: 0; }
+.dialog-body .chart-question { min-height: 0; }
+.dialog-body h3 { margin: 16px 0 9px; }
+.dialog-body .chart-audit { padding-left: 20px; font-size: 12px; }
+.dialog-body .chart-audit li { margin: 5px 0; }
+.dialog-body .method-links { margin: 16px 0; }
+.expanded-graph { height: clamp(300px, 52dvh, 560px); min-height: 280px; }
+.analysis-controls.zelo-dialog { padding: 0; margin: auto; }
+.analysis-controls .controls-grid { gap: 18px; }
+.analysis-controls .dialog-body { padding: 22px; }
+.analysis-controls .analysis-hint { margin-top: 16px; }
+.complementary-dialog { width: min(1280px, calc(100vw - 48px)); }
+.complementary-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.complementary-grid .chart-card { display: flex; flex-direction: column; grid-area: auto; height: 420px; padding: 16px; }
+.complementary-grid .chart-title-row { align-items: center; }
+.dialog-body .hypothesis-gap { margin: 0; }
+@media (min-width: 1800px) {
+  body:has(.general-page) .main-content { padding: 16px 24px; }
+  .general-page .overview-grid { gap: 14px; }
+  .overview-grid .chart-card { padding: 13px 15px 10px; }
+}
+@media (max-width: 1050px) {
+  .overview-heading .description { display: none; }
+  .general-page .stat-card:first-child .description { display: none; }
+  .general-page .overview-grid { grid-template-columns: minmax(205px,1fr) minmax(280px,1.4fr) minmax(205px,1fr); }
+  .general-page .stat-card { gap: 7px; padding-inline: 8px; }
+}
+@media (max-width: 850px), (max-height: 580px) {
+  body:has(.general-page) .app-shell, body:has(.general-page) .workspace { height: auto; min-height: 100dvh; overflow: visible; }
+  body:has(.general-page) .main-content { overflow: visible; }
+  .general-page { height: auto; }
+  .general-page .analysis-hero { flex-direction: column; align-items: stretch; min-height: auto; }
+  .overview-actions { justify-content: space-between; flex-wrap: wrap; }
+  .general-page .analysis-stats { grid-template-columns: minmax(0,1fr); flex-basis: auto; }
+  .general-page .stat-card { padding: 8px 12px; }
+  .general-page .stat-card:first-child .description { display: block; }
+  .general-page .overview-grid { display: flex; flex-direction: column; }
+  .overview-grid .chart-card { min-height: 265px; height: 265px; flex: none; }
+  .overview-grid .chart-position-1 { order: -1; height: 360px; }
+  .overview-grid .chart-position-6 { height: 240px; }
+  .zelo-dialog { width: calc(100vw - 24px); max-width: calc(100vw - 24px); max-height: calc(100dvh - 24px); }
+  .dialog-header, .dialog-body { padding: 16px; }
+  .complementary-grid { grid-template-columns: minmax(0,1fr); }
 }

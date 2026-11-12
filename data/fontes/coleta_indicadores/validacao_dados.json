@@ -1,0 +1,63 @@
+{
+  "coletado_em": "2026-11-12",
+  "verificacao": "conferência de cada registro com a resposta oficial preservada",
+  "arquivos": {
+    "espera_exames_observasampa.csv": {
+      "registros": 2046,
+      "chaves_duplicadas": 0,
+      "registros_conferidos_com_a_fonte": 2046,
+      "ano_inicial": 2008,
+      "ano_final": 2024,
+      "status_valor": {
+        "zero_publicado": 844,
+        "publicado": 1202
+      },
+      "localidades_distintas": 33,
+      "indicadores_distintos": 4
+    },
+    "perda_primaria_ubs_observasampa.csv": {
+      "registros": 6,
+      "chaves_duplicadas": 0,
+      "registros_conferidos_com_a_fonte": 6,
+      "ano_inicial": 2018,
+      "ano_final": 2023,
+      "status_valor": {
+        "publicado": 6
+      },
+      "localidades_distintas": 1,
+      "indicadores_distintos": 1
+    },
+    "absenteismo_ambulatorial_ses_sp.csv": {
+      "registros": 915,
+      "chaves_duplicadas": 0,
+      "registros_conferidos_com_a_fonte": 915,
+      "ano_inicial": 2024,
+      "ano_final": 2025,
+      "status_valor": {
+        "publicado": 897,
+        "zero_publicado": 15,
+        "fora_da_faixa_esperada": 3
+      },
+      "unidades_distintas": 61,
+      "periodos_com_registros": [
+        "2024-T1",
+        "2024-T2",
+        "2024-T3",
+        "2024-T4",
+        "2025-T1"
+      ]
+    }
+  },
+  "controles": {
+    "ame_mogi_das_cruzes_2025_t1_primeira_consulta_percentual": "23.72",
+    "valores_simulados": 0,
+    "registros_transformados_em_zero_para_preencher_lacunas": 0
+  },
+  "ressalvas": [
+    "Conferência da transcrição não certifica a qualidade dos valores publicados.",
+    "Valores fora da faixa esperada foram preservados e sinalizados para revisão.",
+    "Zeros publicados, especialmente nos tempos de espera, requerem interpretação da fonte antes de agregação.",
+    "Consultas SES-SP de 2025-T2 até 2026-T3 retornaram tabelas vazias; não foram criadas taxas nesses períodos.",
+    "Não há numeradores, denominadores ou dispersão suficientes nestes extratos para calcular intervalos de confiança usuais."
+  ]
+}

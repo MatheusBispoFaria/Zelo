@@ -8,23 +8,27 @@ from dash import Dash, Input, Output, dcc, html
 from flask import Response, abort, send_file, stream_with_context
 
 import flood
+import general
+import health
 import home
 import mobility
-from components import icon
-from data_access import DATA_DIR, DATASETS, metadata
-from data_view import register_callbacks
+from shared.components import icon
+from shared.data_access import DATA_DIR, DATASETS, metadata
+from shared.data_view import register_callbacks
 
 
 ROOT = Path(__file__).resolve().parent
-PAGES = {"/": ("Início", home.layout), "/enchentes": ("Enchentes", flood.layout),
+PAGES = {"/": ("Início", home.layout), "/geral": ("Visão geral", general.layout),
+         "/saude": ("Saúde e SUS", health.layout), "/enchentes": ("Enchentes", flood.layout),
          "/mobilidade": ("Mobilidade", mobility.layout)}
-NAVIGATION = [("/", "Início", "home", "home"), ("/enchentes", "Enchentes", "water", "flood"),
+NAVIGATION = [("/", "Início", "home", "home"), ("/geral", "Visão geral", "general", "general"),
+              ("/saude", "Saúde", "health", "health"), ("/enchentes", "Enchentes", "water", "flood"),
               ("/mobilidade", "Mobilidade", "bus", "mobility")]
 
 
 def create_app():
     application = Dash(__name__, assets_folder=str(ROOT / "assets"),
-                       title="Zelo · Dados da cidade", update_title="Carregando…",
+                       title="Zelo · Cuidado e dados", update_title="Carregando…",
                        suppress_callback_exceptions=True,
                        meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}])
     application.index_string = application.index_string.replace("<html>", '<html lang="pt-BR">')
@@ -35,7 +39,7 @@ def create_app():
             html.Aside([
                 dcc.Link([html.Span("Z", className="brand-mark", **{"aria-hidden": "true"}),
                           html.Span("Zelo · Início", className="sr-only")], href="/", className="brand", title="Zelo · Início"),
-                html.Nav([dcc.Link([icon(symbol, "#d5e5ef"), html.Span(label, className="sr-only")],
+                html.Nav([dcc.Link([icon(symbol, "#e8efeb"), html.Span(label, className="sr-only")],
                                    href=href, id=f"rail-{key}", className="rail-link", title=label)
                           for href, label, symbol, key in NAVIGATION],
                          className="rail-nav", **{"aria-label": "Navegação lateral"}),
@@ -50,13 +54,11 @@ def create_app():
                               html.Span("Painel do cidadão", className="breadcrumb-section"),
                               html.Span("/", className="breadcrumb-divider breadcrumb-section"),
                               html.Span("Início", id="breadcrumb-current")], className="breadcrumb"),
-                    html.A(["Fonte dos dados", icon("external")], href="https://dadosabertos.sp.gov.br/",
-                           target="_blank", rel="noopener noreferrer", className="source-link"),
+                    dcc.Link(["Fontes e método", icon("external")], href="/geral#fontes",
+                             className="source-link"),
                 ], className="topbar"),
-                html.Nav([dcc.Link([icon(symbol), label], href=href, id=f"tab-{key}", className="top-tab")
-                          for href, label, symbol, key in NAVIGATION], className="top-tabs", **{"aria-label": "Áreas do painel"}),
                 html.Main(home.layout(), id="page-content", className="main-content", tabIndex=-1),
-                html.Footer([html.Span("Zelo"), html.Span("Dados públicos · Governo do Estado de São Paulo", className="description")],
+                html.Footer([html.Span("Zelo"), html.Span("Dados públicos · Fontes estaduais, municipais e federais", className="description")],
                             className="app-footer"),
             ], className="workspace"),
         ], id="app-shell", className="app-shell"),
@@ -64,7 +66,6 @@ def create_app():
 
     @application.callback(
         Output("page-content", "children"), Output("breadcrumb-current", "children"),
-        *[Output(f"tab-{key}", "className") for _, _, _, key in NAVIGATION],
         *[Output(f"rail-{key}", "className") for _, _, _, key in NAVIGATION],
         Input("url", "pathname"),
     )
@@ -73,18 +74,19 @@ def create_app():
         if path not in PAGES:
             page = html.Section([html.H1("Página não encontrada"),
                                  dcc.Link("Voltar para o início", href="/", className="button")], className="panel missing-page")
-            return (page, "Página não encontrada", *["top-tab"] * 3, *["rail-link"] * 3)
+            return (page, "Página não encontrada", *["rail-link"] * len(NAVIGATION))
         title, view = PAGES[path]
-        tabs = ["top-tab active" if href == path else "top-tab" for href, *_ in NAVIGATION]
         rails = ["rail-link active" if href == path else "rail-link" for href, *_ in NAVIGATION]
-        return (view(), title, *tabs, *rails)
+        return (view(), title, *rails)
 
     @application.callback(Output("app-shell", "className"), Input("menu-toggle", "n_clicks"))
     def collapse_menu(clicks):
-        return "app-shell is-collapsed" if (clicks or 0) % 2 else "app-shell"
+        return "app-shell is-compact" if (clicks or 0) % 2 else "app-shell"
 
     register_callbacks(application, "flood")
     register_callbacks(application, "mobility")
+    register_callbacks(application, "health")
+    general.register_callbacks(application)
 
     @application.server.get("/download/<key>")
     def download_csv(key):

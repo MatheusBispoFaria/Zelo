@@ -1,0 +1,8 @@
+dados de hospitais e leitos no estado de são paulo
+(https://dadosabertos.saude.gov.br/dataset/hospitais-e-leitos)
+
+dados de teleconsultorias e teleinterconsultorias
+(https://dadosabertos.saude.gov.br/dataset/mgdi-telessaude)
+
+dados de precipitação de 2026 Brasil
+(https://portal.inmet.gov.br/dadoshistoricos)

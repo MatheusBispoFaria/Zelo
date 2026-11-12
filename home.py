@@ -1,22 +1,26 @@
-"""Página inicial e acesso aos dois conjuntos temáticos de bases."""
+"""Apresentação do assistente virtual Zelo e acesso às suas áreas de dados."""
 
 from dash import dcc, html
 
-from components import icon
+from shared.components import icon
 
 
 def layout():
     return html.Div([
         html.Section([
-            html.Div([html.Span(className="status-dot"), "Dados públicos de São Paulo"], className="eyebrow"),
-            html.H1("Conheça os dados que aproximam você da sua cidade."),
-            html.P("Explore as bases de chuva, frota e trânsito reunidas pelo Zelo. Escolha uma área para começar a consulta.",
+            html.Div([html.Span(className="status-dot"), "Assistente virtual para o cidadão"], className="eyebrow"),
+            html.H1(["Toda consulta importa. ", html.Em("Todo cidadão também.")]),
+            html.P("O Zelo propõe apoiar o acompanhamento de consultas no SUS, com módulos de avisos de enchentes e apoio aos deslocamentos. Explore as bases públicas do estudo de caso.",
                    className="description home-description"),
             html.Div([
+                _area("Saúde", "Faltas, espera por exames, hospitais, leitos, ouvidoria e telessaúde.",
+                      "Consultar dados do SUS", "/saude", "health", "Fontes estaduais, municipais e federais"),
                 _area("Enchentes", "Chuva acumulada e índices de precipitação por município.",
                       "Consultar dados de chuva", "/enchentes", "water", "Setembro e outubro de 2025"),
                 _area("Mobilidade", "Frota ativa e registros de sinistros, pessoas e veículos.",
                       "Consultar dados de mobilidade", "/mobilidade", "bus", "Bases históricas de 2025 e 2026"),
+                _area("Visão geral", "Saúde, enchentes e mobilidade reunidas na mesma tela.",
+                      "Abrir visão geral", "/geral", "general", "Consulta das três áreas"),
             ], className="area-grid"),
         ], className="panel welcome-panel"),
         html.Section([
