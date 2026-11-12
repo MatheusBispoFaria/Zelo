@@ -5,25 +5,28 @@ import os
 from pathlib import Path
 
 from dash import Dash, Input, Output, dcc, html
-from flask import Response, abort, send_file, stream_with_context
+from flask import Response, abort, jsonify, request, send_file, stream_with_context
 
 import flood
 import general
 import health
 import home
 import mobility
+import simulator
 from shared.components import icon
 from shared.data_access import DATA_DIR, DATASETS, metadata
 from shared.data_view import register_callbacks
+from shared.simulation import simulate_route
 
 
 ROOT = Path(__file__).resolve().parent
 PAGES = {"/": ("Início", home.layout), "/geral": ("Visão geral", general.layout),
          "/saude": ("Saúde e SUS", health.layout), "/enchentes": ("Enchentes", flood.layout),
-         "/mobilidade": ("Mobilidade", mobility.layout)}
+         "/mobilidade": ("Mobilidade", mobility.layout), "/simulador": ("Simulador de alerta", simulator.layout)}
 NAVIGATION = [("/", "Início", "home", "home"), ("/geral", "Visão geral", "general", "general"),
               ("/saude", "Saúde", "health", "health"), ("/enchentes", "Enchentes", "water", "flood"),
-              ("/mobilidade", "Mobilidade", "bus", "mobility")]
+              ("/mobilidade", "Mobilidade", "bus", "mobility"),
+              ("/simulador", "Simulador", "alert", "simulator")]
 
 
 def create_app():
@@ -91,6 +94,16 @@ def create_app():
     register_callbacks(application, "mobility")
     register_callbacks(application, "health")
     general.register_callbacks(application)
+
+    @application.server.get('/api/simulator/route')
+    def simulator_route():
+        try:
+            result = simulate_route(request.args.get('scenario','localizado'), request.args.get('origin','casa'))
+        except ValueError as error:
+            return jsonify({'error':str(error)}),400
+        response = jsonify(result)
+        response.headers['Cache-Control'] = 'no-store'
+        return response
 
     @application.server.get("/download/<key>")
     def download_csv(key):

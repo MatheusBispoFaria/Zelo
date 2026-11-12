@@ -16,6 +16,8 @@ abrem em pop-ups. Os rankings laterais mostram seis valores; a ampliação prese
 12 valores do ranking completo, sem mudar os recortes exportados.
 
 Todos os campos do painel de filtros ficam abertos, sem seções recolhíveis.
+O **Simulador de alerta** demonstra um aviso de alagamento, com mapa, celular
+animado, som breve e uma rota calculada por Dijkstra até um abrigo fictício.
 
 ## Organização
 
@@ -27,11 +29,13 @@ gs_zelo/
   health.py              consulta às bases do SUS e de acesso à saúde
   flood.py               consulta às bases municipais de precipitação
   mobility.py            consulta às bases de frota e sinistros
+  simulator.py           demonstração de alerta, mapa e trajeto fictício
   shared/                componentes e acesso aos dados; não são páginas
     components.py
     data_access.py
     data_view.py
     analytics.py         recortes e métodos estatísticos, sem escrever nas bases
+    simulation.py        cenários fictícios e algoritmo de Dijkstra
   assets/                estilos da interface
   data/                  bases compactadas, fontes e manifesto de integridade
     clima/inmet/2026/    estações de todas as UFs, separadas por UF
@@ -47,7 +51,7 @@ gs_zelo/
 ```
 
 As páginas são Início (`/`), Visão geral (`/geral`), Saúde (`/saude`),
-Enchentes (`/enchentes`) e Mobilidade (`/mobilidade`). A navegação entre páginas
+Enchentes (`/enchentes`), Mobilidade (`/mobilidade`) e Simulador (`/simulador`). A navegação entre páginas
 fica somente no menu lateral. A identidade visual usa verde profundo, fundo creme
 e amarelo; os seletores de bases são campos dentro das páginas.
 
@@ -128,6 +132,28 @@ As consultas de Saúde, Mobilidade e Enchentes continuam lendo as bases originai
 O botão **Baixar recortes e relatório** entrega um ZIP com CSVs derivados, critérios,
 exclusões por gráfico, limites IQR, modelos, nível de confiança e hashes das fontes.
 A documentação detalhada local está em `docs/graficos-metodologia.md`.
+
+## Simulador de alerta
+
+Escolha uma das três posições hipotéticas e um cenário: alagamento localizado,
+ampliado ou origem sem caminho disponível. **Simular alerta** mostra o aviso vermelho,
+anima o celular e reproduz um som breve, que pode ser desativado. A vibração física
+depende do navegador e do aparelho; a animação também funciona no computador.
+**Repetir aviso** repete os efeitos e **Reiniciar** limpa o cenário e interrompe os efeitos.
+
+O fundo é um mapa do [OpenStreetMap](https://www.openstreetmap.org/copyright),
+exibido com [Leaflet 1.9.4](https://leafletjs.com/reference-1.9.4.html).
+Posições, rede de vias, áreas de alagamento e abrigos sobrepostos são **fictícios**,
+sem solicitar GPS. Não representam ocorrências ou abrigos confirmados, nem uma
+previsão gerada pelas bases históricas. As linhas da rede não seguem as ruas reais.
+O mapa de fundo precisa de conexão; a rede demonstrativa permanece disponível sem ele.
+
+Dijkstra remove os trechos bloqueados e minimiza o custo
+`distância em metros × (1 + 8 × risco relativo)`. O risco e seu peso são parâmetros
+didáticos, sem calibração empírica. A linha verde evita bloqueios e minimiza esse
+custo na rede; isso não valida a segurança de uma rota real. Se não houver caminho,
+o sistema informa **trajeto indisponível**. As bases de `data/` continuam intocadas.
+As premissas também estão no ícone de informação da tela e em `docs/simulador.md`.
 
 ## Executar
 

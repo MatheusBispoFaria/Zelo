@@ -1,0 +1,110 @@
+/* Simulador Zelo: cenários fictícios, sem substituir o painel de dados observados. */
+body:has(.simulator-page) .app-shell { height: 100dvh; min-height: 0; overflow: hidden; }
+body:has(.simulator-page) .workspace { height: 100dvh; overflow: hidden; }
+body:has(.simulator-page) .app-footer { display: none; }
+body:has(.simulator-page) .topbar { flex: 0 0 56px; min-height: 56px; padding-block: 4px; }
+body:has(.simulator-page) .main-content { flex: 1; min-height: 0; max-width: none; padding: 16px 20px; overflow: hidden; }
+.simulator-page { display: flex; flex-direction: column; gap: 14px; height: 100%; min-height: 0; }
+.simulator-heading { display: flex; align-items: center; justify-content: space-between; gap: 18px; flex: 0 0 44px; }
+.simulator-heading h1 { margin-bottom: 3px; }
+.simulator-workspace { display: grid; grid-template-columns: 285px minmax(0,1fr); gap: 16px; min-height: 0; flex: 1; }
+.sim-controls { display: flex; flex-direction: column; align-items: stretch; gap: 6px; padding: 14px; background: #fff;
+  border: 1px solid #dce5dc; border-radius: 15px; overflow: auto; }
+.sim-eyebrow { color: #105d57; letter-spacing: .08em; font-size: 10px; }
+.sim-controls h2 { margin-bottom: 0; }
+.sim-controls > label:not(.sim-sound-option) { margin-top: 5px; font-size: 12px; color: #294c40; }
+.sim-select { padding: 8px 10px; min-height: 36px; color: #193e32; background: #fafcf8; border: 1px solid #d5e1d6;
+  border-radius: 7px; font-size: 12px; width: 100%; }
+.sim-select:focus-visible { outline: 2px solid #105d57; outline-offset: 2px; }
+.sim-actions { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; margin: 7px 0 2px; }
+.sim-actions .button { padding-inline: 10px; }
+.sim-actions .icon { width: 17px; height: 17px; }
+.sim-sound-option { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.sim-sound-option input { accent-color: #105d57; width: 15px; height: 15px; margin: 0; }
+.sim-result { padding: 14px 12px; margin-top: 5px; border: 1px solid #e0e8db; border-radius: 10px; background: #f7faf3; }
+.sim-result-title { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
+.sim-result-title h3 { line-height: 1.3; }
+.sim-status-dot { width: 7px; height: 7px; border-radius: 50%; background: #a0b3a6; flex: 0 0 auto; }
+.sim-result > p { margin-bottom: 8px; }
+.sim-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid #e0e8db;
+  padding-top: 9px; margin: 10px 0; }
+.sim-metrics strong { display: block; font-size: 16px; color: #105d57; margin-top: 2px; }
+.sim-repeat { min-height: 30px; padding-block: 5px; }
+.sim-footnote { margin-top: auto; padding-top: 3px; }
+.sim-map-stage { min-width: 0; min-height: 0; position: relative; overflow: hidden; border: 1px solid #d5dfd5;
+  border-radius: 15px; isolation: isolate; background: #e8eee4; }
+.sim-map { position: absolute; inset: 0; background-color: #e8eee4;
+  background-image: linear-gradient(#dce5db 1px,transparent 1px),linear-gradient(90deg,#dce5db 1px,transparent 1px);
+  background-size: 50px 50px; font: 12px 'Segoe UI',Arial,sans-serif; }
+.sim-map .leaflet-control-zoom a { color: #105d57; }
+.sim-map .leaflet-bottom.leaflet-left { bottom: 26px; }
+.sim-map .leaflet-control-attribution { font-size: 10px; }
+.sim-map.tiles-unavailable::after { content: 'Mapa base indisponível · rede fictícia preservada'; position: absolute;
+  left: 14px; bottom: 62px; z-index: 800; background: #ffffffea; padding: 5px 8px; border-radius: 5px;
+  font-size: 10px; color: #3d5e4c; pointer-events: none; }
+.sim-map-note { position: absolute; left: 10px; bottom: 5px; z-index: 800; font-size: 10px; color: #3d5548;
+  padding: 3px 6px; border-radius: 5px; background: #ffffffed; max-width: calc(100% - 20px); pointer-events: none; }
+.sim-map-pin { display: grid; place-items: center; border: 3px solid #fff; border-radius: 50%; box-shadow: 0 2px 10px #172e3640;
+  color: white; font: 700 12px/1 'Segoe UI',Arial,sans-serif; }
+.sim-map-pin.user { background: #347db2; }
+.sim-map-pin.shelter { background: #426b58; }
+.sim-map-pin.selected { background: #087f66; box-shadow: 0 0 0 7px #087f6629,0 2px 10px #172e3640; }
+.sim-user-tooltip { font-size: 12px; border: 1px solid #bed0e2; color: #285e86; background: #fff; border-radius: 6px; padding: 5px 8px; }
+.sim-map-legend { position: absolute; left: 14px; top: 14px; z-index: 850; display: flex; flex-wrap: wrap;
+  gap: 9px; padding: 8px 11px; border-radius: 8px; background: #fffffff2; box-shadow: 0 2px 12px #122f3010;
+  max-width: calc(100% - 75px); font-size: 10px; }
+.sim-map-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
+.legend-dot.user { background: #347db2; }
+.legend-dot.risk { background: #ce4539; }
+.legend-dot.route { background: #087f66; }
+.sim-alert-banner { position: absolute; top: 14px; left: 14px; right: 66px; z-index: 900; background: #bf3c32;
+  color: white; border-radius: 10px; padding: 13px 15px; box-shadow: 0 5px 20px #9d271e30; }
+.sim-alert-banner strong { display: block; font-size: 16px; margin-bottom: 3px; }
+.sim-alert-banner span { display: block; font-size: 12px; }
+.simulator-page[data-phase=alert] .sim-map-legend, .simulator-page[data-phase=route] .sim-map-legend,
+.simulator-page[data-phase=error] .sim-map-legend { top: 111px; }
+.simulator-page[data-phase=route] .sim-status-dot { background: #087f66; }
+.simulator-page[data-route-status=unavailable] .sim-status-dot { background: #bf3c32; }
+.sim-phone { position: absolute; width: 184px; height: 364px; right: 22px; bottom: 58px; z-index: 850;
+  border: 8px solid #152b25; border-radius: 29px; background: #eaf2e8; box-shadow: 0 12px 35px #14342e45; }
+.phone-island { width: 58px; height: 12px; position: absolute; left: 50%; transform: translateX(-50%); top: 6px;
+  border-radius: 10px; background: #152b25; z-index: 1; }
+.phone-header { height: 77px; padding: 27px 13px 10px; border-radius: 20px 20px 0 0; background: #105d57; color: white;
+  display: flex; align-items: center; gap: 8px; }
+.phone-header strong, .phone-header span.description { display: block; }
+.phone-header .description { color: #d4e9e1; }
+.phone-brand { background: #f5bd4f; color: #142f26; width: 25px; height: 25px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; }
+.phone-screen { padding: 13px 10px; }
+.phone-demo-tag { display: block; color: #566e5e; font-size: 10px; letter-spacing: .08em; margin-bottom: 10px; }
+.phone-message-title { color: #244c3a; font-size: 12px; font-weight: 600; margin-bottom: 5px; }
+.phone-screen > p { font-size: 12px; line-height: 1.5; }
+.phone-route { display: flex; align-items: start; gap: 7px; padding: 9px 7px; margin-top: 11px; background: #fff;
+  border-radius: 9px; box-shadow: 0 1px 4px #21452e10; font-size: 12px; line-height: 1.4; }
+.phone-route > span { color: #105d57; font-size: 16px; }
+.phone-vibration-note { position: absolute; bottom: 15px; left: 10px; right: 10px; line-height: 1.3; }
+.phone-home-indicator { position: absolute; width: 55px; height: 3px; background: #14362b; border-radius: 4px;
+  left: 50%; transform: translateX(-50%); bottom: 5px; }
+.phone-sound-wave { position: absolute; right: -25px; top: 45px; color: #bf3c32; font-size: 24px; opacity: 0; }
+.simulator-page[data-phase=alert] .phone-message-title, .simulator-page[data-phase=route] .phone-message-title { color: #b53c31; }
+.is-alert .sim-phone { animation: zelo-vibrate .14s linear 11; }
+.is-alert .phone-sound-wave { animation: zelo-sound .45s ease-out 4; }
+.sim-route-line { stroke-dasharray: 14 7; animation: zelo-route 1.2s linear infinite; }
+@keyframes zelo-vibrate { 0%,100% { transform: translateX(0) rotate(0); } 25% { transform: translateX(-3px) rotate(-1deg); } 75% { transform: translateX(3px) rotate(1deg); } }
+@keyframes zelo-sound { 0% { opacity: .2; transform: translateX(-3px); } 50% { opacity: 1; } 100% { opacity: 0; transform: translateX(8px); } }
+@keyframes zelo-route { to { stroke-dashoffset: -21; } }
+@media (prefers-reduced-motion: reduce) { .is-alert .sim-phone,.is-alert .phone-sound-wave,.sim-route-line { animation: none; } }
+@media (max-width: 1050px) { .simulator-workspace { grid-template-columns: 255px minmax(0,1fr); } .sim-controls { padding: 16px; } .sim-phone { width: 170px; right: 15px; } }
+@media (max-width: 850px), (max-height: 620px) {
+  body:has(.simulator-page) .app-shell,body:has(.simulator-page) .workspace { height: auto; min-height: 100dvh; overflow: visible; }
+  body:has(.simulator-page) .main-content { overflow: visible; padding: 16px 12px; }
+  .simulator-page { height: auto; }
+  .simulator-workspace { display: flex; flex-direction: column; }
+  .sim-controls { overflow: visible; }
+  .sim-map-stage { min-height: 590px; }
+  .sim-phone { width: 178px; height: 370px; right: 12px; bottom: 58px; }
+  .sim-alert-banner strong { font-size: 16px; }
+  .sim-alert-banner { right: 55px; padding: 10px; }
+  .sim-map-legend { max-width: calc(100% - 65px); }
+  .sim-metrics { max-width: 400px; }
+}
