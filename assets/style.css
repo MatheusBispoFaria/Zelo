@@ -6,13 +6,13 @@
   --muted: #738594;
   --line: #e9eff3;
   --surface: #f6f9fc;
-  --normal: 12px;
-  --description: 10px;
-  --title: 16px;
+  --normal: 12pt;
+  --description: 10pt;
+  --title: 16pt;
 }
 * { box-sizing: border-box; }
 html { min-width: 320px; background: #eaf1fa; }
-body { margin: 0; color: var(--ink); font: 400 var(--normal)/1.6 "Segoe UI", Arial, sans-serif; }
+body { margin: 0; color: var(--ink); font: 400 var(--normal)/1.45 "Segoe UI", Arial, sans-serif; }
 body::before, body::after { content: ""; position: fixed; z-index: -1; pointer-events: none; border-radius: 50%; }
 body::before { width: 720px; height: 720px; top: -355px; right: -285px; background: #617d9e; }
 body::after { width: 620px; height: 620px; bottom: -470px; left: -220px; background: #2db18c; }
@@ -24,10 +24,10 @@ button:disabled { cursor: default; opacity: .35; }
 button:focus-visible, a:focus-visible, input:focus-visible, [tabindex="0"]:focus-visible {
   outline: 2px solid var(--green); outline-offset: 3px;
 }
-h1, h2, h3 { margin: 0; font-size: var(--title); font-weight: 600; line-height: 1.5; color: #152e3e; }
+h1, h2, h3, h4, h5, h6 { margin: 0; font-size: var(--title); font-weight: 600; line-height: 1.25; color: #152e3e; }
 p { margin: 0; }
 strong { font-weight: 600; }
-.description { font-size: var(--description); color: var(--muted); font-weight: 400; line-height: 1.7; }
+.description { font-size: var(--description); color: var(--muted); font-weight: 400; line-height: 1.45; }
 .icon { width: 19px; height: 19px; flex: 0 0 auto; vertical-align: middle; }
 .app-shell { display: grid; grid-template-columns: 64px minmax(0, 1fr); max-width: 1640px; min-height: calc(100vh - 56px);
   margin: 28px auto; width: calc(100% - 64px); background: white; box-shadow: 0 8px 38px #1838560d; border: 1px solid #dfe8f0; }
@@ -45,12 +45,12 @@ strong { font-weight: 600; }
 .state-mark { display: grid; place-items: center; width: 29px; height: 29px; border: 1px solid #91abc149; border-radius: 50%; color: #d3e1eb; font-size: var(--description); }
 .workspace { display: flex; flex-direction: column; min-width: 0; }
 .topbar { display: flex; justify-content: space-between; align-items: center; min-height: 68px; gap: 16px; padding: 12px 28px; border-bottom: 1px solid var(--line); background: #fff; }
-.breadcrumb { display: flex; align-items: center; gap: 13px; min-width: 0; }
+.breadcrumb { display: flex; flex: 1; align-items: center; gap: 13px; min-width: 0; }
 .brand-name { font-weight: 600; }
 .breadcrumb-divider { color: #acbac5; }
-#breadcrumb-current { color: #687e8e; }
+#breadcrumb-current { color: #687e8e; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #dce7e9;
-  border-radius: 4px; background: #fff; color: #31556b; min-height: 35px; padding: 7px 12px; font-size: var(--normal); white-space: nowrap; }
+  border-radius: 4px; background: #fff; color: #31556b; min-height: 40px; padding: 7px 12px; font-size: var(--normal); white-space: nowrap; }
 .button:hover:not(:disabled) { background: #f0f8f5; border-color: #9ecdbf; }
 .menu-button { width: 44px; height: 44px; min-width: 44px; min-height: 44px; padding: 9px;
   margin: 0; border: 1px solid #cddbd1; border-radius: 10px; color: var(--green); }
@@ -120,20 +120,22 @@ strong { font-weight: 600; }
 .table-tools { display: grid; grid-template-columns: minmax(180px, 1.6fr) minmax(140px, 1fr) minmax(140px, 1fr) auto; align-items: end;
   gap: 12px; padding: 0 24px 20px; border-bottom: 1px solid var(--line); }
 .table-tools label { display: block; margin-bottom: 5px; font-size: var(--description); color: #758995; }
-.search-control { display: flex; align-items: center; gap: 9px; border: 1px solid #dce5ec; border-radius: 4px; height: 36px; padding: 0 10px; background: #fff; }
+.search-control { display: flex; align-items: center; gap: 9px; border: 1px solid #dce5ec; border-radius: 4px; height: 40px; padding: 0 10px; background: #fff; }
 .search-control:focus-within { border-color: var(--green); box-shadow: 0 0 0 1px #cce9df; }
 .search-control .icon { width: 15px; height: 15px; }
 .search-input { border: 0; outline: 0; color: var(--ink); width: 100%; min-width: 0; padding: 0; font-size: var(--normal); height: 32px; background: transparent; }
 .search-input::placeholder { color: #a2afba; }
 .search-input:focus-visible { outline: 0; }
 .zelo-select { font-size: var(--normal); }
-.zelo-select .Select-control { height: 36px; border-color: #dce5ec; border-radius: 4px; }
-.zelo-select .Select-placeholder, .zelo-select .Select--single > .Select-control .Select-value { line-height: 34px; color: #537082; }
-.zelo-select .Select-input { height: 34px; }
+.zelo-select .Select-control { height: 40px; border-color: #dce5ec; border-radius: 4px; }
+.zelo-select .Select-placeholder, .zelo-select .Select--single > .Select-control .Select-value { line-height: 38px; color: #537082; }
+.zelo-select .Select-input { height: 38px; }
+.zelo-select .Select-input > input, .zelo-select .Select-value-label, .zelo-select .Select-placeholder,
+.zelo-select .Select-option, .zelo-select .VirtualizedSelectOption { font-size: var(--normal) !important; }
 .zelo-select .Select-menu-outer { border-color: #dce5ec; box-shadow: 0 4px 12px #132f4012; z-index: 50; }
 .zelo-select.is-focused:not(.is-open) > .Select-control, .zelo-select .is-focused:not(.is-open) > .Select-control { border-color: var(--green); box-shadow: 0 0 0 1px #cce9df; }
 .zelo-select .VirtualizedSelectFocusedOption { background: #eff8f3; }
-.order-button { height: 36px; min-width: 107px; font-size: var(--normal); }
+.order-button { height: 40px; min-width: 107px; font-size: var(--normal); }
 .table-loading { min-height: 280px; }
 .table-scroll { overflow: auto; max-height: 440px; min-height: 280px; width: 100%; scrollbar-width: thin; scrollbar-color: #c4d4df #f4f7fa; }
 .data-table { border-collapse: separate; border-spacing: 0; width: 100%; text-align: left; font-size: var(--normal); white-space: nowrap; }
@@ -274,6 +276,18 @@ a:hover { color: var(--green); }
 .search-control, .zelo-select .Select-control { border-color: #d9e1d7; border-radius: 7px; }
 .app-shell.is-collapsed { grid-template-columns: 0 minmax(0, 1fr); }
 .app-shell.is-collapsed .sidebar { visibility: hidden; pointer-events: none; }
+/* A borda indica como abrir o menu, sem expandi-lo por acidente. */
+.sidebar-reveal-edge { display: none; position: fixed; inset: 0 auto 0 0; width: 12px; z-index: 35; }
+.is-collapsed .sidebar-reveal-edge { display: block; }
+.menu-hint { position: fixed; top: 64px; left: 16px; z-index: 40; padding: 10px 14px;
+  max-width: calc(100vw - 32px); border: 1px solid #e5c16d; border-radius: 9px;
+  background: #fff7e3; color: var(--ink); box-shadow: 0 5px 20px #0c292518;
+  font-size: var(--normal); visibility: hidden; opacity: 0; pointer-events: none; }
+.is-collapsed:has(.sidebar-reveal-edge:hover) .menu-hint,
+.is-collapsed:has(.menu-button:hover, .menu-button:focus-visible) .menu-hint { visibility: visible; opacity: 1; }
+.is-collapsed:has(.sidebar-reveal-edge:hover) .menu-button,
+.is-collapsed .menu-button:hover, .is-collapsed .menu-button:focus-visible {
+  background: #fff1c8; border-color: #d5a131; box-shadow: 0 0 0 4px #f5bd4f45; }
 .analysis-hero { display: flex; justify-content: space-between; gap: 24px; align-items: center; margin-bottom: 24px; }
 .analysis-hero h1 { margin: 8px 0; }
 .analysis-hero p { max-width: 740px; }
@@ -299,7 +313,7 @@ a:hover { color: var(--green); }
 .chart-card.chart-wide { grid-column: 1 / -1; }
 .chart-number { color: var(--green); background: #fff5dc; padding: 3px 8px; border-radius: 5px; font-size: var(--description); }
 .chart-title-row { display: flex; gap: 10px; align-items: start; margin-bottom: 8px; }
-.chart-card h2 { font-size: var(--title); line-height: 1.45; }
+.chart-card h2 { font-size: var(--title); line-height: 1.25; }
 .chart-question { color: var(--muted); font-size: var(--description); min-height: 35px; margin-bottom: 12px; }
 .chart-card .dash-graph { min-width: 0; width: 100%; }
 .chart-caption { font-size: var(--description); color: #53675f; border-top: 1px solid var(--line); padding-top: 12px; line-height: 1.75; }
@@ -341,30 +355,31 @@ a:hover { color: var(--green); }
 }
 
 /* Visão geral: comparação de exames | espera | faltas, com chuva mensal abaixo. */
-body:has(.general-page) .app-shell { height: 100dvh; min-height: 0; overflow: hidden; }
-body:has(.general-page) .workspace { height: 100dvh; overflow: hidden; }
-body:has(.general-page) .topbar { flex: 0 0 56px; min-height: 56px; padding-block: 4px; }
-body:has(.general-page) .app-footer { display: none; }
-body:has(.general-page) .main-content { max-width: none; flex: 1; min-height: 0; padding: 12px 18px; overflow: hidden; }
-.general-page { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 10px; }
-.general-page .analysis-hero { flex: 0 0 36px; min-height: 36px; margin: 0; gap: 14px; }
+.workspace-general { height: 100dvh; min-height: 0; overflow: hidden; }
+.workspace-general .topbar { flex: 0 0 64px; min-height: 64px; padding-block: 4px; }
+.workspace-general .app-footer { display: none; }
+.workspace-general .main-content { max-width: 1660px; flex: 1; min-height: 0; padding: 16px 24px; overflow: clip; }
+#general-page { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 10px; }
+.workspace-general .analysis-hero { flex: 0 0 42px; min-height: 42px; margin: 0; gap: 14px; }
 .overview-heading { display: flex; align-items: baseline; gap: 14px; min-width: 0; }
 .overview-heading h1 { margin: 0; white-space: nowrap; }
 .overview-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-.overview-actions .button { min-height: 30px; padding: 5px 12px; }
-.analysis-loading-shell { flex: 1; min-height: 0; width: 100%; }
-.analysis-loading-shell > div { height: 100%; }
-.general-page .analysis-busy { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
-.general-page .analysis-stats { flex: 0 0 37px; display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 10px; margin: 0; }
-.general-page .stat-card { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 5px 12px;
+.overview-actions .button { min-height: 38px; padding: 5px 12px; }
+.analysis-loading-shell { flex: 1; min-height: 0; width: 100%; position: relative; }
+.analysis-loading-shell > div:first-child { height: 100%; min-height: 0; }
+/* A sobreposição do spinner não ocupa uma segunda altura no fluxo do painel. */
+.analysis-loading-shell > div:not(:first-child) { position: absolute; inset: 0; pointer-events: none; }
+.workspace-general .analysis-busy { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.workspace-general .analysis-stats { flex: 0 0 42px; display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 10px; margin: 0; }
+.workspace-general .stat-card { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 5px 12px;
   border-radius: 9px; border-left-width: 2px; }
-.general-page .stat-value { margin: 0; white-space: nowrap; }
-.general-page .stat-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.general-page .stat-card .description { display: none; }
-.general-page .stat-card:first-child .description { display: block; margin-left: auto; white-space: nowrap; }
-.general-page .overview-grid { display: grid; flex: 1; min-height: 0; gap: 10px;
-  grid-template-columns: minmax(220px, 1fr) minmax(340px, 1.55fr) minmax(220px, 1fr);
-  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) minmax(135px, .85fr);
+.workspace-general .stat-value { margin: 0; white-space: nowrap; }
+.workspace-general .stat-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.workspace-general .stat-card .description { display: none; }
+.workspace-general .stat-card:first-child .description { display: block; margin-left: auto; white-space: nowrap; }
+.workspace-general .overview-grid { display: grid; flex: 1; min-height: 0; max-height: 660px; gap: 12px;
+  grid-template-columns: minmax(250px, 1fr) minmax(340px, 1.35fr) minmax(250px, 1fr);
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) 160px;
   grid-template-areas: 'offer waiting absence' 'topics waiting trend' 'rain rain rain'; }
 .chart-position-1 { grid-area: waiting; }
 .chart-position-2 { grid-area: absence; }
@@ -373,16 +388,35 @@ body:has(.general-page) .main-content { max-width: none; flex: 1; min-height: 0;
 .chart-position-5 { grid-area: topics; }
 .chart-position-6 { grid-area: rain; }
 .overview-grid .chart-card { display: flex; flex-direction: column; min-height: 0; padding: 9px 11px 7px;
-  border-radius: 12px; overflow: hidden; }
+  border-radius: 9px; overflow: hidden; }
 .overview-grid .chart-title-row { flex: 0 0 auto; align-items: center; min-height: 25px; gap: 7px; margin-bottom: 3px; }
 .chart-title-row h2 { flex: 1; min-width: 0; }
 .overview-grid .chart-title-row h2 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .overview-grid .chart-context { flex: 0 0 auto; margin: 0 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.overview-grid .chart-context { line-height: 1.25; }
 .overview-grid .chart-number { padding: 2px 5px; }
+.chart-subtitle-row { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; margin-bottom: 4px; }
+.chart-subtitle-row .chart-context { flex: 1; min-width: 0; margin: 0; }
+.chart-expand-button { flex: 0 0 auto; min-height: 34px; padding: 4px 10px; font-size: var(--normal); }
+.zelo-dialog.chart-focus-dialog { width: min(1500px, calc(100vw - 32px)); max-width: calc(100vw - 32px);
+  height: min(920px, calc(100dvh - 32px)); max-height: calc(100dvh - 32px); }
+.chart-focus-dialog .dialog-header { gap: 14px; padding: 14px 20px; flex-wrap: wrap; }
+.chart-focus-dialog .dialog-header h2 { flex: 1; }
+.chart-focus-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.chart-focus-dialog .chart-focus-body { display: flex; flex: 1; flex-direction: column; min-height: 0; padding: 14px 20px 18px; overflow: hidden; }
+.chart-focus-context { flex: 0 0 auto; margin: 0 0 10px; }
+.chart-focus-graph { flex: 1; min-height: 0; width: 100%; }
+@media (max-width: 700px) {
+  .zelo-dialog.chart-focus-dialog { width: calc(100vw - 16px); max-width: calc(100vw - 16px);
+    height: calc(100dvh - 16px); max-height: calc(100dvh - 16px); }
+  .chart-focus-actions { gap: 6px; }
+  .chart-reset-button { font-size: var(--description); }
+  .chart-focus-body { padding-inline: 10px; }
+}
 .compact-plot { flex: 1; min-height: 0; min-width: 0; }
 .compact-plot > .dash-graph { height: 100%; min-height: 0; }
-.info-button { display: inline-grid; place-items: center; flex: 0 0 auto; width: 25px; height: 25px; border-radius: 50%;
-  border: 1px solid #ceded4; background: #f3f7f0; color: var(--green); font: 700 16px/1 Georgia, serif; padding: 0; }
+.info-button { display: inline-grid; place-items: center; flex: 0 0 auto; width: 30px; height: 30px; border-radius: 50%;
+  border: 1px solid #ceded4; background: #f3f7f0; color: var(--green); font: 700 var(--title)/1 Georgia, serif; padding: 0; }
 .info-button:hover { background: #e6f0e4; border-color: #85aa97; }
 .zelo-dialog { width: min(980px, calc(100vw - 48px)); max-width: calc(100vw - 48px); max-height: calc(100dvh - 48px);
   padding: 0; border: 1px solid #cfdbd1; border-radius: 16px; background: #fff; color: var(--ink);
@@ -395,42 +429,61 @@ body:has(.general-page) .main-content { max-width: none; flex: 1; min-height: 0;
   border-radius: 50%; background: white; font: 400 20px/1 'Segoe UI',sans-serif; color: var(--green); }
 .dialog-body { padding: 20px 22px; overflow: auto; overscroll-behavior: contain; }
 .dialog-body p { margin: 0 0 13px; }
-.dialog-body .chart-caption { font-size: 12px; padding: 0; border: 0; }
+.dialog-body .chart-caption { font-size: var(--description); padding: 0; border: 0; }
 .dialog-body .chart-question { min-height: 0; }
 .dialog-body h3 { margin: 16px 0 9px; }
-.dialog-body .chart-audit { padding-left: 20px; font-size: 12px; }
+.dialog-body .chart-audit { padding-left: 20px; font-size: var(--description); overflow-wrap: anywhere; }
 .dialog-body .chart-audit li { margin: 5px 0; }
 .dialog-body .method-links { margin: 16px 0; }
-.expanded-graph { height: clamp(300px, 52dvh, 560px); min-height: 280px; }
-.analysis-controls.zelo-dialog { padding: 0; margin: auto; }
-.analysis-controls .controls-grid { gap: 18px; }
-.analysis-controls .dialog-body { padding: 22px; }
+.expanded-graph { height: clamp(320px, 48dvh, 480px); min-height: 300px; }
+.analysis-controls.zelo-dialog { width: min(1320px, calc(100vw - 32px)); max-width: calc(100vw - 32px);
+  max-height: calc(100dvh - 32px); padding: 0; margin: auto; }
+.analysis-controls .controls-grid { gap: 24px; }
+.analysis-controls .dialog-header { padding: 22px 28px; }
+.analysis-controls .dialog-body { padding: 28px; padding-bottom: 44px; }
+.analysis-controls .analysis-recortes .controls-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 28px; }
 .analysis-controls .analysis-hint { margin-top: 16px; }
+@media (max-width: 1100px) {
+  .analysis-controls .controls-grid, .analysis-controls .analysis-recortes .controls-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 700px) {
+  .analysis-controls .controls-grid, .analysis-controls .analysis-recortes .controls-grid { grid-template-columns: minmax(0, 1fr); }
+  .analysis-controls .dialog-header, .analysis-controls .dialog-body { padding: 18px; }
+}
 .dialog-body .hypothesis-gap { margin: 0; }
 @media (min-width: 1800px) {
-  body:has(.general-page) .main-content { padding: 16px 24px; }
-  .general-page .overview-grid { gap: 14px; }
+  .workspace-general .main-content { padding: 16px 24px; }
+  .workspace-general .overview-grid { gap: 14px; }
   .overview-grid .chart-card { padding: 13px 15px 10px; }
 }
 @media (max-width: 1050px) {
   .overview-heading .description { display: none; }
-  .general-page .stat-card:first-child .description { display: none; }
-  .general-page .overview-grid { grid-template-columns: minmax(205px,1fr) minmax(280px,1.4fr) minmax(205px,1fr); }
-  .general-page .stat-card { gap: 7px; padding-inline: 8px; }
+  .workspace-general .stat-card:first-child .description { display: none; }
+  .workspace-general .overview-grid { grid-template-columns: minmax(205px,1fr) minmax(280px,1.4fr) minmax(205px,1fr); }
+  .workspace-general .stat-card { gap: 7px; padding-inline: 8px; }
+}
+@media (max-width: 1350px) {
+  .workspace-general .stat-card:first-child .description, .overview-heading .description { display: none; }
 }
 @media (max-width: 850px), (max-height: 580px) {
-  body:has(.general-page) .app-shell, body:has(.general-page) .workspace { height: auto; min-height: 100dvh; overflow: visible; }
-  body:has(.general-page) .main-content { overflow: visible; }
-  .general-page { height: auto; }
-  .general-page .analysis-hero { flex-direction: column; align-items: stretch; min-height: auto; }
+  .workspace-general { height: auto; min-height: 100dvh; overflow: visible; }
+  .workspace-general .main-content { overflow: visible; }
+  #general-page { height: auto; }
+  .workspace-general .analysis-hero { flex: 0 0 auto; flex-direction: column; align-items: stretch; min-height: auto; }
+  .overview-heading h1 { white-space: normal; }
   .overview-actions { justify-content: space-between; flex-wrap: wrap; }
-  .general-page .analysis-stats { grid-template-columns: minmax(0,1fr); flex-basis: auto; }
-  .general-page .stat-card { padding: 8px 12px; }
-  .general-page .stat-card:first-child .description { display: block; }
-  .general-page .overview-grid { display: flex; flex-direction: column; }
+  .workspace-general .analysis-stats { grid-template-columns: minmax(0,1fr); flex-basis: auto; }
+  .workspace-general .stat-card { padding: 8px 12px; }
+  .workspace-general .stat-card:first-child .description { display: block; }
+  .workspace-general .overview-grid { display: flex; flex-direction: column; max-height: none; }
   .overview-grid .chart-card { min-height: 265px; height: 265px; flex: none; }
   .overview-grid .chart-position-1 { order: -1; height: 360px; }
   .overview-grid .chart-position-6 { height: 240px; }
   .zelo-dialog { width: calc(100vw - 24px); max-width: calc(100vw - 24px); max-height: calc(100dvh - 24px); }
   .dialog-header, .dialog-body { padding: 16px; }
 }
+
+/* As janelas de informação ficam fora da grade; nunca participam de suas medidas. */
+.analysis-dialog-host { flex: 0 0 0; height: 0; min-height: 0; }
+.overview-grid .chart-position-6 .compact-plot { width: 100%; max-width: 1180px; align-self: center; }

@@ -37,6 +37,8 @@ def create_app():
         dcc.Location(id="url", refresh=False),
         html.A("Ir para o conteúdo", href="#page-content", className="skip-link"),
         html.Div([
+            html.Div(className="sidebar-reveal-edge", **{"aria-hidden": "true"}),
+            html.Span("Clique no Menu para expandir", id="menu-hint", className="menu-hint", role="tooltip"),
             html.Aside([
                 dcc.Link([html.Span("Z", className="brand-mark", **{"aria-hidden": "true"}),
                           html.Span("Zelo · Início", className="sr-only")], href="/", className="brand", title="Zelo · Início"),
@@ -49,8 +51,9 @@ def create_app():
             html.Div([
                 html.Header([
                     html.Div([html.Button(icon("menu"), id="menu-toggle", n_clicks=0, className="menu-button button",
-                                          title="Recolher menu lateral", **{"aria-label": "Alternar menu lateral",
-                                                                          "aria-controls": "primary-sidebar", "aria-expanded": "true"}),
+                                          title="Expandir menu lateral", **{"aria-label": "Alternar menu lateral",
+                                                                          "aria-controls": "primary-sidebar", "aria-expanded": "false",
+                                                                          "aria-describedby": "menu-hint"}),
                               dcc.Link("Zelo", href="/", className="brand-name"),
                               html.Span("/", className="breadcrumb-divider"),
                               html.Span("Painel do cidadão", className="breadcrumb-section"),
@@ -62,12 +65,13 @@ def create_app():
                 html.Main(home.layout(), id="page-content", className="main-content", tabIndex=-1),
                 html.Footer([html.Span("Zelo"), html.Span("Dados públicos · Fontes estaduais, municipais e federais", className="description")],
                             className="app-footer"),
-            ], className="workspace"),
-        ], id="app-shell", className="app-shell"),
+            ], id="app-workspace", className="workspace"),
+        ], id="app-shell", className="app-shell is-collapsed"),
     ])
 
     @application.callback(
         Output("page-content", "children"), Output("breadcrumb-current", "children"),
+        Output("app-workspace", "className"),
         *[Output(f"rail-{key}", "className") for _, _, _, key in NAVIGATION],
         Input("url", "pathname"),
     )
@@ -76,17 +80,18 @@ def create_app():
         if path not in PAGES:
             page = html.Section([html.H1("Página não encontrada"),
                                  dcc.Link("Voltar para o início", href="/", className="button")], className="panel missing-page")
-            return (page, "Página não encontrada", *["rail-link"] * len(NAVIGATION))
+            return (page, "Página não encontrada", "workspace", *["rail-link"] * len(NAVIGATION))
         title, view = PAGES[path]
         rails = ["rail-link active" if href == path else "rail-link" for href, *_ in NAVIGATION]
-        return (view(), title, *rails)
+        workspace = "workspace workspace-general" if path == "/geral" else "workspace"
+        return (view(), title, workspace, *rails)
 
     @application.callback(Output("app-shell", "className"), Output("menu-toggle", "aria-expanded"),
                           Output("menu-toggle", "title"), Input("menu-toggle", "n_clicks"))
     def collapse_menu(clicks):
         if (clicks or 0) % 2:
-            return "app-shell is-collapsed", "false", "Mostrar menu lateral"
-        return "app-shell", "true", "Recolher menu lateral"
+            return "app-shell", "true", "Recolher menu lateral"
+        return "app-shell is-collapsed", "false", "Expandir menu lateral"
 
     register_callbacks(application, "flood")
     register_callbacks(application, "health")

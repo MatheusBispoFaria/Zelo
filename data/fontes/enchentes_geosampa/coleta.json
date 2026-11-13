@@ -1,0 +1,161 @@
+{
+  "coletado_em": "2026-11-13",
+  "orgao_produtor": "SMSU / Coordenadoria Municipal de Defesa Civil (COMDEC)",
+  "distribuidor": "Prefeitura de São Paulo / GeoSampa",
+  "sistema_origem": "SIGRC",
+  "municipio": "São Paulo",
+  "cod_ibge": "3550308",
+  "uf": "SP",
+  "registros": 1700,
+  "por_ano": {
+    "2024": {
+      "linhas_todos_tipos_na_fonte": 4736,
+      "tipos_na_fonte": {
+        "QUEDA DE ARVORE": 4091,
+        "ALAGAMENTO": 214,
+        "DESLIZAMENTO": 194,
+        "INUNDACAO": 237
+      },
+      "ultima_alteracao_gpkg": "2026-06-02T17:39:18.996Z",
+      "ultima_data_todos_tipos": "2024-12-31",
+      "parcial": false,
+      "registros_incluidos": 451,
+      "por_tipo": {
+        "ALAGAMENTO": 214,
+        "INUNDACAO": 237
+      },
+      "primeira_data_hidrologica": "2024-01-06",
+      "ultima_data_hidrologica": "2024-12-31"
+    },
+    "2025": {
+      "linhas_todos_tipos_na_fonte": 5993,
+      "tipos_na_fonte": {
+        "QUEDA DE ARVORE": 5030,
+        "DESLIZAMENTO": 300,
+        "ALAGAMENTO": 281,
+        "INUNDACAO": 382
+      },
+      "ultima_alteracao_gpkg": "2026-06-02T17:39:17.210Z",
+      "ultima_data_todos_tipos": "2025-12-31",
+      "parcial": false,
+      "registros_incluidos": 663,
+      "por_tipo": {
+        "ALAGAMENTO": 281,
+        "INUNDACAO": 382
+      },
+      "primeira_data_hidrologica": "2025-01-02",
+      "ultima_data_hidrologica": "2025-12-31"
+    },
+    "2026": {
+      "linhas_todos_tipos_na_fonte": 2579,
+      "tipos_na_fonte": {
+        "QUEDA DE ARVORE": 1836,
+        "ALAGAMENTO": 292,
+        "INUNDACAO": 294,
+        "DESLIZAMENTO": 157
+      },
+      "ultima_alteracao_gpkg": "2026-10-06T20:05:10.689Z",
+      "ultima_data_todos_tipos": "2026-09-30",
+      "parcial": true,
+      "registros_incluidos": 586,
+      "por_tipo": {
+        "ALAGAMENTO": 292,
+        "INUNDACAO": 294
+      },
+      "primeira_data_hidrologica": "2026-01-04",
+      "ultima_data_hidrologica": "2026-09-28"
+    }
+  },
+  "originais_gpkg": {
+    "SIRGAS_GPKG_riscoocorrencia_2024.gpkg": {
+      "sha256": "5136a7af3d9b9ffdaecdbd469c0949e8290666e7146dcca1fa4012357d3a8256",
+      "srs_id": 31983
+    },
+    "SIRGAS_GPKG_riscoocorrencia_2025.gpkg": {
+      "sha256": "0f3ad8c55d94317fedd6f52f4590ec5ff2a45cc2e53b3a838626b6b807d18c8c",
+      "srs_id": 31983
+    },
+    "SIRGAS_GPKG_riscoocorrencia_2026.gpkg": {
+      "sha256": "c03753213bed8a7c66d20c6833722ec08ef914158a8cbc8f5c68a5f6945f5fb2",
+      "srs_id": 31983
+    }
+  },
+  "download_oficial": {
+    "url": "https://download.geosampa.prefeitura.sp.gov.br/PaginasPublicas/downloadArquivo.aspx?orig=DownloadTemas&arq=07_Prote%E7%E3o%20e%20Defesa%20Civil%5COcorrencias%5CGPKG_ZIP%5CSIRGAS_GPKG_riscoocorrencia.zip&arqTipo=zip",
+    "headers": {
+      "Content-Type": "text/html; charset=iso-8859-1",
+      "Content-Disposition": "attachment; filename=SIRGAS_GPKG_riscoocorrencia.zip",
+      "X-UA-Compatible": "IE=edge",
+      "Strict-Transport-Security": "max-age=63072000; includeSubDomains",
+      "Date": "Fri, 13 Nov 2026 04:17:25 GMT",
+      "Connection": "close",
+      "Content-Length": "11348042",
+      "Vary": "Accept-Encoding"
+    },
+    "bytes": 11348042,
+    "sha256": "ffd60d02b87c7052c8df4fb62540ae0b970e2bd96f71f75394e9bbb384377035",
+    "headers_omitidos": [
+      "Set-Cookie"
+    ]
+  },
+  "metadados": {
+    "ALAGAMENTO": "https://metadados.geosampa.prefeitura.sp.gov.br/geonetwork/srv/api/records/432c06b1-03a1-4b1f-9210-423e1b58e869",
+    "INUNDACAO": "https://metadados.geosampa.prefeitura.sp.gov.br/geonetwork/srv/api/records/9d08d20d-f6c7-463d-a349-c28c47babff2"
+  },
+  "transformacoes": [
+    "Seleção exclusiva dos arquivos anuais de 2024, 2025 e 2026.",
+    "Filtro exato ocorrencia IN (ALAGAMENTO, INUNDACAO); outros tipos não entram no CSV.",
+    "Campos id/primaryindex e subprefeit/subpreit harmonizados, com nome original da camada no arquivo_origem.",
+    "Geometria Point convertida em X/Y SIRGAS 2000 UTM 23S (EPSG:31983) preservados e longitude/latitude EPSG:4326 derivados.",
+    "Coordenadas convertidas com pyproj 3.8.0, always_xy=True; saída em graus arredondada para oito casas.",
+    "Ano, mês, ID técnico composto, município, UF, código IBGE, código de subprefeitura e URL de metadados acrescentados.",
+    "Valores de subprefeitura e referência name preservados; ordenação cronológica. Não foram imputados horários, endereços, intensidade ou duração.",
+    "Nenhuma deduplicação de chamados: registros do mesmo ponto/data/tipo com índices distintos foram mantidos.",
+    "possivel_duplicata_atributos=1 marca todas as linhas com atributos iguais exceto índice; revisão preservada para uma futura cópia analítica."
+  ],
+  "qualidade": {
+    "ids_duplicados": 0,
+    "sem_coordenadas": 0,
+    "sem_subprefeitura": 0,
+    "registros_excedentes_no_mesmo_ponto_data_tipo": 8,
+    "repeticoes_de_todos_atributos_exceto_indice": 1,
+    "linhas_marcadas_possivel_duplicata": 2,
+    "ids_marcados_possivel_duplicata": [
+      "geosampa_2025_4437",
+      "geosampa_2025_4443"
+    ],
+    "deduplicados": 0,
+    "registros_fora_do_periodo": 0,
+    "validacao_wfs_2026": {
+      "registros_conferidos": 586,
+      "diferenca_maxima_coordenadas_aproximada_m": 0.002224000184014585,
+      "criterio": "data + tipo + código de subprefeitura + pareamento bijetivo por proximidade (<1m). IDs do WFS e GeoPackage não são equivalentes."
+    },
+    "erro_maximo_transformacao_ida_volta_m": 1.862645149230957e-09
+  },
+  "periodo_chuva_compativel": {
+    "2025-09": 23,
+    "2025-10": 11,
+    "2026-01_2026-09": 586
+  },
+  "limites": [
+    "Uma linha é uma ocorrência administrativa publicada, não necessariamente um evento hidrometeorológico independente.",
+    "A data é a abertura do registro, conforme o dicionário oficial. Horário e fuso não são publicados; não interpretar como instante exato da inundação.",
+    "2026 é parcial: dados gerais até setembro e carga de outubro; outubro–dezembro não são meses sem ocorrência.",
+    "A cobertura é a capital paulista e os registros georreferenciados publicados; não todos os municípios do estado nem todos os alagamentos reais.",
+    "Dias sem linhas significam ausência de registro nesta extração, sem comprovar ausência de alagamento.",
+    "O campo name é preservado como referencia_original sem presumir sua semântica. id_registro identifica a linha nesta versão do arquivo.",
+    "Chuva diária UTC e data de abertura sem horário exigem tratamento temporal explícito; chuva média municipal não representa automaticamente a chuva de cada ponto."
+  ],
+  "arquivo_csv": {
+    "path": "data/enchentes/geosampa/ocorrencias_hidrologicas_sp_2024_2026.csv",
+    "encoding": "utf-8-sig",
+    "delimiter": ",",
+    "decimal": ".",
+    "bytes": 557822,
+    "sha256": "918580e70c0533f8c3885a91c378f03bb36697aeb92bd45625b648b8f671c781",
+    "gzip_bytes": 75810,
+    "gzip_sha256": "f888cb004d9dddd1efef3f8756e6148870b68b57ba355fc8db474b041fba9797"
+  },
+  "bases_preexistentes_alteradas": false
+}

@@ -175,8 +175,12 @@
     layers=L.layerGroup().addTo(map);
     const points=Object.values(initial.nodes).map(n=>[n.lat,n.lon]);
     map.fitBounds(points,{paddingTopLeft:[30,65],paddingBottomRight:window.innerWidth>850?[225,45]:[30,45],animate:false});
-    resizeObserver=new ResizeObserver(()=>map?.invalidateSize({animate:false}));
+    resizeObserver=new ResizeObserver(()=>{
+      root?.style.setProperty('--sim-alert-height',(byId('sim-alert')?.getBoundingClientRect().height || 84)+'px');
+      map?.invalidateSize({animate:false});
+    });
     resizeObserver.observe(byId('simulator-map'));
+    resizeObserver.observe(byId('sim-alert'));
     reset();
   }
   document.addEventListener('click',event=>{

@@ -15,6 +15,8 @@ from shared.components import icon, format_int
 
 logger = logging.getLogger(__name__)
 GREEN, YELLOW, INK = '#105d57', '#efb947', '#192a25'
+# Plotly usa pixels; mesma escala de 12 pt / 10 pt definida no CSS (96 dpi).
+FONT_NORMAL, FONT_DESCRIPTION = 12 * 96 / 72, 10 * 96 / 72
 EXAMS = {
     'tempo-entre-data-do-agendamento-do-procedimento-e-data-da-vaga-do-procedimento-para-mamografia': 'Mamografia',
     'tempo-entre-data-do-agendamento-do-procedimento-e-data-da-vaga-do-procedimento-para-ressonancia-magnetica': 'Ressonância magnética',
@@ -67,7 +69,7 @@ def layout():
         ], className='analysis-hero'),
         popout('analysis-filters', 'Filtros e recortes da análise', [
             html.Div([
-                field('Nível dos intervalos de confiança', choose('analysis-confidence', {0.90:'90%', .95:'95%', .99:'99%'}, .95)),
+                field('Intervalos de confiança', choose('analysis-confidence', {'off':'Desativar IC', 0.90:'90%', .95:'95%', .99:'99%'}, .95)),
                 field('Tratamento de extremos', dcc.Checklist(id='analysis-iqr', options=[{'label':'Remover extremos por IQR', 'value':'on'}],
                                                              value=[], labelClassName='check-label')),
                 field('Limites do IQR', choose('analysis-factor', {1.5:'1,5 × IQR', 3.0:'3 × IQR'}, 1.5)),
@@ -89,41 +91,42 @@ def layout():
             ], className='analysis-recortes'),
         ], 'analysis-controls'),
         dcc.Loading(html.Div(id='analysis-content', className='analysis-busy'), color=GREEN, type='circle', delay_show=150,
-                    parent_className='analysis-loading-shell', style={'height':'100%'}),
+                    parent_className='analysis-loading-shell'),
         dcc.Store(id='analysis-export'), dcc.Download(id='analysis-download'),
         method_section(),
-    ], className='general-page')
+    ], id='general-page', className='general-page')
 
 
 def figure(x_title='', y_title=''):
     chart = go.Figure()
     chart.update_layout(template='plotly_white', paper_bgcolor='white', plot_bgcolor='white', height=340,
-                        font={'family':'Segoe UI, Arial, sans-serif','size':12,'color':INK},
+                        font={'family':'Segoe UI, Arial, sans-serif','size':FONT_NORMAL,'color':INK},
                         margin={'l':52,'r':18,'t':14,'b':76}, separators=',.',
-                        xaxis_title=x_title, yaxis_title=y_title, hoverlabel={'font_size':12},
-                        legend={'orientation':'h','y':-0.24,'x':0,'font':{'size':10}},
-                        colorway=[GREEN,YELLOW,'#7d9c89'], uniformtext={'minsize':12,'mode':'show'}, uirevision='zelo-analysis')
-    chart.update_xaxes(showgrid=False, zeroline=False, tickfont={'size':12}, title_font={'size':12})
-    chart.update_yaxes(gridcolor='#edf0e9', zeroline=False, tickfont={'size':12}, title_font={'size':12})
+                        xaxis_title=x_title, yaxis_title=y_title, hoverlabel={'font_size':FONT_NORMAL},
+                        legend={'orientation':'h','y':-0.24,'x':0,'font':{'size':FONT_DESCRIPTION}},
+                        colorway=[GREEN,YELLOW,'#7d9c89'], uniformtext={'minsize':FONT_DESCRIPTION,'mode':'show'}, uirevision='zelo-analysis')
+    chart.update_xaxes(showgrid=False, zeroline=False, tickfont={'size':FONT_DESCRIPTION}, title_font={'size':FONT_DESCRIPTION})
+    chart.update_yaxes(gridcolor='#edf0e9', gridwidth=1, zeroline=False, tickfont={'size':FONT_DESCRIPTION}, title_font={'size':FONT_DESCRIPTION})
     return chart
 
 
 def empty(chart, message):
     chart.add_annotation(text='<br>'.join(textwrap.wrap(message, 46)), x=.5, y=.5, xref='paper', yref='paper',
-                         showarrow=False, font={'size':12,'color':'#53675f'})
+                         showarrow=False, font={'size':FONT_DESCRIPTION,'color':'#53675f'})
     return chart
 
 
 def band(chart, x, low, high, name):
     chart.add_trace(go.Scatter(x=list(x), y=list(low), mode='lines', line={'width':0}, hoverinfo='skip', showlegend=False))
     chart.add_trace(go.Scatter(x=list(x), y=list(high), mode='lines', line={'width':0}, fill='tonexty',
-                              fillcolor='rgba(16,93,87,0.13)', hoverinfo='skip', name=name))
+                              fillcolor='rgba(16,93,87,0.08)', hoverinfo='skip', name=name))
 
 
 def add_regression(chart, df, x, y, confidence, temporal=False):
     points, info = analysis.regression(df[x], df[y], confidence, temporal)
     if info['disponivel']:
-        band(chart, points['x'], points['ic_inferior'], points['ic_superior'], f'IC {confidence:.0%} da média ajustada')
+        if confidence is not None:
+            band(chart, points['x'], points['ic_inferior'], points['ic_superior'], f'IC {confidence:.0%} da média ajustada')
         chart.add_trace(go.Scatter(x=points['x'].tolist(), y=points['ajuste'].tolist(), mode='lines',
                                   line={'color':GREEN,'width':2,'dash':'dash'}, name='Regressão linear'))
     return points, info
@@ -131,10 +134,13 @@ def add_regression(chart, df, x, y, confidence, temporal=False):
 
 def model_text(info, unit):
     if not info['disponivel']:return info['motivo']
-    lower, upper = info['ic_inclinacao']
     r2 = f"{info['r_quadrado']:.2f}" if info['r_quadrado'] is not None else 'indefinido'
+    interval = 'IC desativado'
+    if info['ic_inclinacao'] is not None:
+        lower, upper = info['ic_inclinacao']
+        interval = f"IC {info['nivel_confianca']:.0%} [{lower:.2f}; {upper:.2f}]"
     return (f"Ajuste exploratório: n={info['n']}; inclinação {info['inclinacao']:.2f} {unit}; "
-            f"IC {info['nivel_confianca']:.0%} [{lower:.2f}; {upper:.2f}]; R²={r2}.").replace('.', ',').rstrip(',') + '.'
+            f"{interval}; R²={r2}.").replace('.', ',').rstrip(',') + '.'
 
 
 def card(number, title, question, chart, caption, audit, wide=False, context=''):
@@ -144,55 +150,100 @@ def card(number, title, question, chart, caption, audit, wide=False, context='')
     if audit.get('invalidos_retirados'):details.append(html.Li(f"Valores fora da faixa válida retirados: {audit['invalidos_retirados']}."))
     if audit.get('zeros_retirados'):details.append(html.Li(f"Zeros publicados retirados da espera: {audit['zeros_retirados']}. A interpretação permanece pendente."))
     details.append(html.Li('O relatório do download contém todos os critérios, limites do IQR e a metodologia dos intervalos.'))
-    short_titles = {1:'Espera por exames',2:'Faltas por unidade',3:'Faltas por tipo de consulta',
-                    4:'Qual exame demora mais?',5:'Dificuldades de acesso',6:'Quando a chuva passa do limiar?'}
-    full = go.Figure(chart)
-    full.update_layout(height=None, autosize=True)
+    short_titles = {1:'Espera por exames',2:'Faltas por unidade',3:'Faltas por consulta',
+                    4:'Espera entre exames',5:'Dificuldades de acesso',6:'Quando a chuva passa do limiar?'}
+    full = focus_figure(chart, number)
     compact = compact_figure(chart, number)
     content = [html.P(question, className='chart-question'), html.P(caption, className='chart-caption')]
-    if number <= 6:
-        content.append(dcc.Graph(id=f'general-chart-{number}-expanded', figure=full, responsive=True,
-                                 config={'displaylogo':False,'locale':'pt-br'}, className='expanded-graph'))
     if number in (2,5):
-        content.append(html.P('O quadro principal mostra os seis maiores valores. O gráfico ampliado mantém os 12 valores do ranking original.', className='description'))
+        content.append(html.P('O quadro principal mostra os quatro maiores valores. Expandir mostra os 12 valores do ranking original, com os nomes completos.', className='description'))
     content.extend([html.H3('Fonte e tratamento'), html.Ul(details, className='chart-audit')])
-    return html.Section([
+    section = html.Section([
         html.Div([html.Span(f'{number:02d}', className='chart-number'),
                   html.H2(short_titles.get(number, title)),
-                  info_button(f'chart-information-{number}', f'Informações e ampliação do gráfico {number}')],
+                  info_button(f'chart-information-{number}', f'Informações do gráfico {number}')],
                  className='chart-title-row'),
-        html.P(context, className='description chart-context') if context else None,
+        html.Div([
+            html.P(context, className='description chart-context'),
+            html.Button('Expandir', className='button chart-expand-button',
+                **{'aria-label':f'Expandir gráfico {number}', 'aria-expanded':'false',
+                   'aria-controls':f'chart-focus-{number}', 'data-open-dialog':f'chart-focus-{number}',
+                   'data-expand-card':str(number)}),
+        ],className='chart-subtitle-row'),
         html.Div(dcc.Graph(id=f'general-chart-{number}', figure=compact if number <= 6 else full,
             responsive=True, config={'displaylogo':False,'responsive':True,'locale':'pt-br',
-                                    'modeBarButtonsToRemove':['lasso2d','select2d'],
+                                    'scrollZoom':False, 'doubleClick':'reset',
+                                    'modeBarButtonsToRemove':['zoom2d','pan2d','lasso2d','select2d','zoomIn2d','zoomOut2d','autoScale2d'],
                                     'toImageButtonOptions':{'format':'png','filename':f'zelo-analise-{number}','scale':2}},
             style={'height':'100%','minHeight':0}), className='compact-plot'),
-        popout(f'chart-information-{number}', f'{number:02d} · {title}', content),
     ], className=f'chart-card chart-position-{number}')
+    initial_axes = {}
+    for name in ('xaxis','yaxis'):
+        axis = getattr(full.layout,name)
+        initial_axes[name+'.autorange'] = axis.autorange if axis.autorange is not None else True
+        if axis.range is not None:
+            initial_axes[name+'.range'] = list(axis.range)
+            initial_axes[name+'.autorange'] = False
+    focus = html.Dialog([
+        html.Div([
+            html.H2(short_titles.get(number,title), id=f'chart-focus-{number}-title'),
+            html.Div([
+                info_button(f'chart-information-{number}', f'Informações do gráfico {number} ampliado'),
+                html.Button('Restaurar enquadramento', className='button chart-reset-button',
+                    **{'data-reset-chart':f'general-chart-{number}-focus',
+                       'data-reset-layout':json.dumps(initial_axes)}),
+                html.Button('Minimizar', className='button button-primary',
+                    **{'aria-label':f'Minimizar gráfico {number}', 'data-close-dialog':f'chart-focus-{number}'}),
+            ],className='chart-focus-actions'),
+        ],className='dialog-header'),
+        html.Div([
+            html.P(context, className='description chart-focus-context'),
+            dcc.Graph(id=f'general-chart-{number}-focus', figure=full, responsive=True,
+                config={'displaylogo':False,'locale':'pt-br','scrollZoom':False,'doubleClick':'reset',
+                        'modeBarButtonsToRemove':['lasso2d','select2d'],
+                        'toImageButtonOptions':{'format':'png','filename':f'zelo-analise-{number}','scale':2}},
+                className='chart-focus-graph'),
+        ],className='dialog-body chart-focus-body'),
+    ], id=f'chart-focus-{number}', className='zelo-dialog chart-focus-dialog',
+       **{'aria-labelledby':f'chart-focus-{number}-title', 'data-focused-chart':str(number)})
+    return section, [popout(f'chart-information-{number}', f'{number:02d} · {title}', content), focus]
+
+
+def focus_figure(chart, number):
+    """Versão completa e independente do enquadramento da prévia."""
+    full = go.Figure(chart)
+    full.update_layout(height=None, autosize=True, dragmode='zoom')
+    if number in (2,5):
+        for trace in full.data:
+            if trace.customdata is not None:
+                trace.y = ['<br>'.join(textwrap.wrap(str(name).title(), 34)) for name in trace.customdata]
+        full.update_layout(margin={'l':220,'r':50,'t':20,'b':60})
+        full.update_yaxes(dtick=1, automargin=True)
+    return full
 
 
 def compact_figure(chart, number):
     """Ajusta a apresentação; os cálculos e os recortes exportados são os mesmos."""
     compact = go.Figure(chart)
     compact.update_layout(height=None, autosize=True, margin={'l':42,'r':12,'t':6,'b':40},
-                          showlegend=number == 1,
-                          legend={'orientation':'h','y':-.22,'x':0,'font':{'size':10}})
+                          showlegend=number == 1, dragmode=False,
+                          legend={'orientation':'h','y':-.22,'x':0,'font':{'size':FONT_DESCRIPTION}})
     if number == 1:
         compact.update_layout(margin={'l':44,'r':12,'t':8,'b':65})
         compact.update_xaxes(title_text='Ano')
         compact.update_yaxes(title_text='Dias')
     elif number in (2,5):
         for trace in compact.data:
-            trace.x = list(trace.x)[-6:]
-            trace.y = list(trace.y)[-6:]
-            if trace.customdata is not None:trace.customdata = list(trace.customdata)[-6:]
-        compact.update_layout(margin={'l':132,'r':12,'t':5,'b':34})
-        compact.update_xaxes(title_text='Faltas (%)' if number == 2 else 'Registros', nticks=4)
+            trace.x = list(trace.x)[-4:]
+            trace.y = list(trace.y)[-4:]
+            if trace.customdata is not None:trace.customdata = list(trace.customdata)[-4:]
+        compact.update_layout(margin={'l':132,'r':12,'t':5,'b':23})
+        compact.update_xaxes(title_text=None, nticks=4)
         compact.update_yaxes(dtick=1)
     elif number in (3,4):
         compact.update_layout(margin={'l':112,'r':14,'t':7,'b':32})
         compact.update_yaxes(title_text=None, showgrid=False, automargin=True)
-        compact.update_xaxes(title_text='Média de taxas (%)' if number == 3 else 'Dias', nticks=4,
+        compact.update_xaxes(title_text='Faltas (%)' if number == 3 else 'Dias', nticks=4,
                              showgrid=True, gridcolor='#edf0e9', rangemode='tozero')
     elif number == 6:
         compact.update_layout(margin={'l':45,'r':12,'t':18,'b':26})
@@ -210,15 +261,46 @@ def bar_chart(frame, name, value, title):
                'DIAGNÓSTICO POR ULTRA-SONOGRAFIA':'Ultrassonografia',
                'DIAGNÓSTICO POR ENDOSCOPIA':'Endoscopia'} if name == 'tema' else {}
     labels = [aliases.get(str(v), str(v).title() if len(str(v)) <= 23 else str(v)[:22].title()+'…') for v in shown[name]]
-    chart.add_trace(go.Bar(x=shown[value].tolist(), y=labels, orientation='h', marker_color=GREEN,
+    chart.add_trace(go.Bar(x=shown[value].tolist(), y=labels, orientation='h', marker_color=GREEN, width=.52,
                           customdata=shown[name].tolist(), name='Observado', textposition='outside',
                           texttemplate='%{x:.1f}%' if value == 'valor' else '%{x:,.0f}',
-                          textfont={'size':12}, constraintext='none', cliponaxis=False,
+                          textfont={'size':FONT_DESCRIPTION}, constraintext='none', cliponaxis=False,
                           hovertemplate='%{customdata}<br>%{x:,.2f}<extra></extra>'))
     chart.update_layout(margin={'l':145,'r':18,'t':10,'b':55}, showlegend=False)
     chart.update_xaxes(gridcolor='#edf0e9', showgrid=True, range=[0,float(shown[value].max())*1.28 or 1])
     chart.update_yaxes(showgrid=False, automargin=True)
     return chart
+
+
+def absence_boxplot(paired, means, confidence, show_ci):
+    """Distribuições das taxas individuais; o diamante separado mostra média e IC."""
+    chart = figure('Taxa de faltas por unidade · %')
+    if paired.empty:return empty(chart, 'Não há unidades com as três modalidades válidas neste recorte.')
+    labels = {'primeira_consulta':'Primeira consulta', 'interconsulta':'Interconsulta', 'subsequente':'Retorno'}
+    for key, label in labels.items():
+        rows = paired.loc[paired['modalidade_consulta'].eq(key)]
+        chart.add_trace(go.Box(x=rows['valor'].tolist(), y=[label]*len(rows), name=label,
+            orientation='h', quartilemethod='linear', boxpoints='outliers', notched=False,
+            boxmean=False, width=.48, fillcolor='rgba(16,93,87,.16)',
+            line={'color':GREEN,'width':1.8}, marker={'color':GREEN,'size':5},
+            text=rows['unidade_nome'].tolist(), showlegend=False))
+    if show_ci:
+        chart.add_trace(go.Scatter(x=means['media'].tolist(), y=means['modalidade'].map(labels).tolist(),
+            mode='markers', name=f'Média e IC {confidence:.0%}',
+            marker={'symbol':'diamond','size':9,'color':YELLOW,'line':{'color':'#795516','width':1}},
+            error_x={'type':'data','symmetric':False,
+                'array':(means['ic_superior']-means['media']).clip(lower=0).tolist(),
+                'arrayminus':(means['media']-means['ic_inferior']).clip(lower=0).tolist(),
+                'color':'#a57518','thickness':2,'width':4},
+            customdata=means[['ic_inferior','ic_superior','unidades']].to_numpy().tolist(),
+            hovertemplate='%{y}<br>Média: %{x:.2f}%<br>IC: %{customdata[0]:.2f}% a %{customdata[1]:.2f}%<br>%{customdata[2]} unidades<extra></extra>'))
+    chart.update_layout(margin={'l':145,'r':20,'t':15,'b':85}, showlegend=show_ci, boxmode='overlay')
+    chart.update_yaxes(categoryorder='array', categoryarray=list(labels.values()), autorange='reversed', showgrid=False)
+    chart.update_xaxes(rangemode='tozero', range=[0,float(paired['valor'].max())*1.1 or 1],
+                       showgrid=True, gridcolor='#edf0e9')
+    return chart
+
+
 
 
 def build_dashboard(config):
@@ -231,7 +313,7 @@ def build_dashboard(config):
     wait, info = analysis.waiting(c['exam'], c['zeros'], enabled, factor)
     chart = figure('Ano de referência', 'Tempo médio publicado · dias')
     chart.add_trace(go.Scatter(x=wait['ano'].tolist(), y=wait['valor'].tolist(), mode='lines+markers',
-                              marker={'color':YELLOW,'size':8,'line':{'color':GREEN,'width':1}}, line={'color':'#b3c6bb','width':1}, name='Espera publicada'))
+                              marker={'color':GREEN,'size':5,'line':{'color':'white','width':.6}}, line={'color':'#81978c','width':1.4}, name='Espera publicada'))
     fit, model = add_regression(chart, wait, 'ano', 'valor', confidence, True)
     if wait.empty:empty(chart, 'Sem anos válidos neste recorte.')
     chart.update_xaxes(dtick=2, tickformat='d')
@@ -239,7 +321,9 @@ def build_dashboard(config):
     info['regressao'] = model
     cards.append(card(1, 'Como evoluiu a espera por exames?',
         f"Quanto tempo o Zelo poderia ajudar a economizar? Contexto observado: {EXAMS[c['exam']]} na capital, intervalo de {interval}.",
-        chart, 'Este histórico não mede tempo economizado pelo Zelo. A faixa representa a média ajustada do modelo, não um intervalo da taxa publicada ou previsão de atendimento. ' + model_text(model, 'dias/ano'), info, True,
+        chart, 'Este histórico não mede tempo economizado pelo Zelo. ' +
+        ('A faixa representa a média ajustada do modelo, não um intervalo da taxa publicada ou previsão de atendimento. ' if confidence is not None else 'A regressão permanece visível, com os intervalos desativados. ') +
+        model_text(model, 'dias/ano'), info, True,
         context=f"{EXAMS[c['exam']]} · capital paulista"))
     frames['01_espera_observada'] = wait
     frames['01_regressao_espera'] = fit
@@ -256,31 +340,15 @@ def build_dashboard(config):
     frames['02_taxas_incluidas'] = rates
     report['graficos']['02_faltas'] = info
 
-    # 3. Comparação direta entre modalidades, com uma coorte pareada por unidade.
+    # 3. Dispersão das taxas entre as mesmas unidades, separada por modalidade.
     means, paired, info = analysis.absence_modalities(c['quarter'], MODALITIES, enabled, factor, confidence)
-    chart = figure('Média simples das taxas de faltas · %')
-    if means.empty:empty(chart, 'Não há unidades com as três modalidades válidas neste recorte.')
-    else:
-        shown = means.sort_values('media')
-        labels = {'primeira_consulta':'Primeira consulta','interconsulta':'Interconsulta','subsequente':'Retorno'}
-        errors = None
-        if info['ic_disponivel']:
-            errors = {'type':'data','symmetric':False,
-                'array':(shown['ic_superior']-shown['media']).clip(lower=0).tolist(),
-                'arrayminus':(shown['media']-shown['ic_inferior']).clip(lower=0).tolist(),
-                'color':'#192a25','thickness':1.5,'width':4}
-        chart.add_trace(go.Bar(x=shown['media'].tolist(), y=shown['modalidade'].map(labels).tolist(),
-            orientation='h', marker_color=GREEN, error_x=errors, texttemplate='%{x:.1f}%', textposition='inside',
-            insidetextanchor='middle', textfont={'size':12,'color':'white'}, constraintext='none', customdata=shown['unidades'].tolist(),
-            hovertemplate='%{y}<br>Média de taxas: %{x:.2f}%<br>%{customdata} unidades na mesma coorte<extra></extra>'))
-        maximum = max(float(shown['media'].max()), float(shown['ic_superior'].max()) if info['ic_disponivel'] else 0)
-        chart.update_xaxes(range=[0,maximum*1.2 or 1])
-        chart.update_yaxes(showgrid=False, automargin=True)
-        chart.update_layout(showlegend=False, margin={'l':140,'r':20,'t':15,'b':50})
-    cards.append(card(3, 'Em qual modalidade de consulta há mais faltas?',
-        'Onde faria sentido testar lembretes de confirmação primeiro?', chart,
-        'Compara as mesmas unidades nas três modalidades no trimestre escolhido. Barras mostram a média simples das taxas, não a taxa de pacientes da rede. As hastes mostram IC exploratório por bootstrap pareado de unidades. O gráfico não mede efeito do Zelo.', info,
-        context=f"{c['quarter']} · mesmas {info['coorte_completa_unidades']} unidades · "+(f'IC {confidence:.0%}' if info['ic_disponivel'] else 'IC indisponível')))
+    chart = absence_boxplot(paired, means, confidence, info['ic_disponivel'])
+    cards.append(card(3, 'Como as faltas se distribuem por tipo de consulta?',
+        'Quais modalidades apresentam maior dispersão das taxas entre unidades?', chart,
+        'Cada caixa representa as taxas das mesmas unidades no trimestre: linha central = mediana; caixa = Q1 a Q3; bigodes = valores até 1,5 IQR; pontos externos permanecem visíveis. Caixas e bigodes não são intervalos de confiança. ' +
+        ('O diamante amarelo e suas hastes mostram separadamente a média e seu IC exploratório por bootstrap pareado. ' if info['ic_disponivel'] else 'O diamante da média com IC não é exibido neste recorte. ') +
+        'A variação é entre unidades, sem medir o efeito do Zelo.', info,
+        context=f"{c['quarter']} · {info['coorte_completa_unidades']} unid. · "+('IC desativado' if confidence is None else f'◆ IC {confidence:.0%}' if info['ic_disponivel'] else 'IC indisponível')))
     frames['03_modalidades_media_ic'] = means
     frames['03_unidades_pareadas'] = paired
     report['graficos']['03_modalidades'] = info
@@ -292,8 +360,8 @@ def build_dashboard(config):
     else:
         shown = comparisons.sort_values('valor')
         names = shown['exame'].replace({'Ressonância magnética':'Ressonância'})
-        chart.add_trace(go.Bar(x=shown['valor'].tolist(), y=names.tolist(), orientation='h', marker_color=GREEN,
-            texttemplate='%{x:.0f} dias', textposition='outside', textfont={'size':12}, cliponaxis=False,
+        chart.add_trace(go.Bar(x=shown['valor'].tolist(), y=names.tolist(), orientation='h', marker_color=GREEN, width=.5,
+            texttemplate='%{x:.0f} dias', textposition='outside', textfont={'size':FONT_DESCRIPTION}, cliponaxis=False,
             hovertemplate='%{y}<br>%{x:.0f} dias entre agendamento e vaga<extra></extra>'))
         chart.update_xaxes(range=[0,float(shown['valor'].max())*1.3 or 1])
         chart.update_yaxes(showgrid=False, automargin=True)
@@ -311,7 +379,7 @@ def build_dashboard(config):
     cards.append(card(5, 'Quais dificuldades aparecem na ouvidoria?',
         'O que fundamenta investigar a necessidade de um assistente? Temas das manifestações ligadas a SP.', chart,
         f"{format_int(info['registros_no_recorte'])} registros na seleção, considerando origem SP OU destino SP. Exibe até 12 temas. São manifestações publicadas, não prevalência entre cidadãos. Linhas iguais foram mantidas: não há ID que comprove duplicação do evento.", info,
-        context='2025 · manifestações com origem ou destino em SP'))
+        context='Manifestações · SP · 2025'))
     frames['05_temas_ouvidoria'] = topics
     report['graficos']['05_ouvidoria'] = info
 
@@ -322,10 +390,10 @@ def build_dashboard(config):
     if daily.empty:empty(chart, 'Nenhuma estação tem a cobertura mínima escolhida.')
     else:
         values = monthly['percentual_dias']
-        chart.add_trace(go.Bar(x=MONTHS, y=values.tolist(),
+        chart.add_trace(go.Bar(x=MONTHS, y=values.tolist(), width=.55,
             marker_color=[YELLOW if pd.notna(v) and v==values.max() else GREEN for v in values],
             text=[f'{v:.1f}%'.replace('.',',') if pd.notna(v) else '' for v in values],
-            textposition='outside', textfont={'size':12}, cliponaxis=False,
+            textposition='outside', textfont={'size':FONT_DESCRIPTION}, cliponaxis=False,
             customdata=monthly[['dias_acima','dias_estacao','estacoes']].to_numpy().tolist(),
             hovertemplate='%{x}/2026<br>%{y:.1f}% das medições diárias completas acima do limiar<br>%{customdata[0]} acima / %{customdata[1]} dias-estação<br>%{customdata[2]} estações com dados neste mês<extra></extra>'))
         chart.update_yaxes(range=[0,float(values.max())*1.3 or 1])
@@ -346,7 +414,8 @@ def build_dashboard(config):
              f"{EXAMS[c['exam']]} · {int(last['ano'])}" if last is not None else 'Reveja os filtros'),
         stat('Filtros da análise', f'{factor:g}'.replace('.', ',')+' × IQR' if enabled else 'IQR desligado',
              'Exclusões apenas nos gráficos; limites no relatório'),
-        stat('Incerteza das estimativas', f'IC {confidence:.0%}', 'Regressão da espera e comparação entre modalidades; hipóteses no método'),
+        stat('Incerteza das estimativas', 'IC desativado' if confidence is None else f'IC {confidence:.0%}',
+             'Intervalos não calculados; distribuições preservadas' if confidence is None else 'Regressão da espera e comparação entre modalidades; hipóteses no método'),
     ], className='analysis-stats')
     gaps = html.Div([
         html.H3('O que ainda precisamos medir para testar o Zelo?'),
@@ -355,7 +424,9 @@ def build_dashboard(config):
         html.P('Avisos de enchente: ocorrências locais e horários dos avisos para medir acertos, falsos avisos e antecedência. Chuva sozinha não fornece esse resultado.'),
         html.P('Fila da UPA: eventos de chegada, triagem e atendimento. O cadastro hospitalar não substitui esses registros.'),
     ], className='hypothesis-gap')
-    return [stats, html.Div(cards, className='chart-grid overview-grid'),
+    sections, dialogs = zip(*cards)
+    return [stats, html.Div(list(sections), className='chart-grid overview-grid'),
+            html.Div([dialog for group in dialogs for dialog in group], className='analysis-dialog-host'),
             popout('analysis-limitations', 'Limites e próximos passos do estudo', [gaps])], package(frames, report)
 
 
@@ -410,7 +481,7 @@ def register_callbacks(app):
                   Input('analysis-quarter','value'), Input('analysis-threshold','value'), Input('analysis-coverage','value'),
                   Input('analysis-classification','value'))
     def update(confidence, iqr, factor, zeros, exam, modality, quarter, threshold, coverage, classification):
-        config = {'confidence':confidence if confidence in (.90,.95,.99) else .95,
+        config = {'confidence':None if confidence == 'off' else confidence if confidence in (.90,.95,.99) else .95,
                   'iqr':'on' in (iqr or []), 'factor':factor if factor in (1.5,3.0) else 1.5,
                   'zeros':'on' in (zeros or []), 'exam':exam if exam in EXAMS else DEFAULTS['exam'],
                   'modality':modality if modality in MODALITIES else 'primeira_consulta',

@@ -11,11 +11,29 @@ intervalos de confiança e filtros aplicados somente a cópias analíticas.
 
 A Visão geral concentra os seis gráficos principais em um quadro: espera no centro,
 comparação entre exames e dificuldades à esquerda, faltas à direita e chuva mensal abaixo.
-Fontes, tratamentos e ampliações ficam nos ícones de informação. Os filtros
-abrem em um pop-up. Os rankings laterais mostram seis valores; a ampliação preserva os
+Fontes e tratamentos ficam nos ícones de informação. **Expandir** destaca o gráfico
+em uma área ampla; o controle passa a **Minimizar** para retornar ao quadro. Os filtros
+abrem em um pop-up. Os rankings laterais mostram quatro valores; a ampliação preserva os
 12 valores do ranking completo, sem mudar os recortes exportados.
 
+A área ampliada mostra os nomes completos dos rankings e tem **Restaurar enquadramento**.
+Ela abre com a visão completa dos dados, independentemente do zoom anterior. A prévia
+do cartão mantém informações ao passar o mouse e usa a expansão para exploração visual.
+
+As informações dos gráficos abrem em janelas independentes da grade. Abrir ou fechar
+essas janelas preserva a posição dos seis cartões. O quadro tem proporções limitadas
+em telas grandes, com barras mais estreitas, linhas discretas e intervalos mais leves.
+
 Todos os campos do painel de filtros ficam abertos, sem seções recolhíveis.
+O pop-up de filtros tem uma área mais ampla. Em **Intervalos de confiança**, a opção
+**Desativar IC** mantém a regressão e as distribuições, sem calcular ou exibir os
+intervalos; o download registra essa escolha. Caixas e bigodes do box plot continuam
+visíveis porque descrevem dispersão, não confiança.
+
+O menu lateral começa recolhido. Passar o mouse na borda esquerda destaca o botão
+do menu e mostra **Clique no Menu para expandir**. A dica também aparece ao focar
+o botão pelo teclado; a expansão acontece pelo clique.
+
 O **Simulador de alerta** demonstra um aviso de alagamento, com mapa, celular
 animado, som breve e uma rota calculada por Dijkstra até um abrigo fictício.
 
@@ -39,6 +57,7 @@ gs_zelo/
   data/                  bases compactadas, fontes e manifesto de integridade
     clima/inmet/2026/    estações de todas as UFs, separadas por UF
     clima/precipitacao_mg/
+    enchentes/geosampa/   1.700 registros oficiais de alagamento e inundação
     saude/indicadores/
     saude/hospitais_leitos/
     saude/ouvidorsus/
@@ -56,14 +75,16 @@ e amarelo; os seletores de bases são campos dentro das páginas.
 
 ## Dados e procedência
 
-Há **646 CSVs compactados**: duas bases de chuva anteriores e 644 incorporadas de
-`dados_salvar`. A importação também preserva a planilha XLSX, os links de origem,
+Há **647 CSVs compactados**: duas bases de chuva anteriores, 644 incorporadas de
+`dados_salvar` e uma base preparada a partir dos GeoPackages oficiais da COMDEC/GeoSampa.
+A importação também preserva a planilha XLSX, os links de origem,
 os metadados e as evidências da coleta de indicadores. Todos os 990 arquivos
 recebidos nessa pasta têm correspondência registrada no manifesto.
 
-Os CSVs estão em **`.csv.gz`**, com compactação sem perdas: aproximadamente
-**459.65 MiB para 94.19 MiB** em conjunto. Nenhuma linha, coluna ou byte
-dos CSVs de origem foi descartado ou corrigido. Cada arquivo foi lido, descompactado
+Os CSVs estão em **`.csv.gz`**, com compactação sem perdas. As 646 bases anteriores
+mantêm os bytes dos CSVs de origem. A nova base de ocorrências foi extraída dos
+GeoPackages, filtrada por tipo e convertida para CSV, com as transformações
+documentadas em `data/enchentes/geosampa/README.md`. Cada CSV foi descompactado
 para conferência e comparado ao original por SHA-256. A pasta pessoal de origem
 permanece intacta. As cópias descompactadas não são necessárias à execução.
 
@@ -74,6 +95,7 @@ permanece intacta. As cópias descompactadas não são necessárias à execuçã
 | [ObservaSampa](https://dados-abertos-observasampa.prefeitura.sp.gov.br/saude) | Espera por exames e perda primária de consultas | Capital paulista; período e nível territorial variam por indicador |
 | [Ministério da Saúde](https://dadosabertos.saude.gov.br/) | Hospitais/leitos, OuvidorSUS 2 e quatro indicadores de telessaúde | Bases nacionais preservadas; o recorte SP deve ser explícito na análise |
 | [INMET](https://portal.inmet.gov.br/dadoshistoricos) | 634 estações horárias de 2026 | Brasil; 41 estações em SP; janeiro a outubro de 2026, com lacunas de medição |
+| [COMDEC / GeoSampa](https://metadados.geosampa.prefeitura.sp.gov.br/geonetwork/srv/api/records/432c06b1-03a1-4b1f-9210-423e1b58e869) | 1.700 registros datados e georreferenciados de alagamento e inundação | Capital; 2024, 2025 e 2026 parcial até setembro; data de abertura, sem horário |
 | Camada de precipitação média anual de MG | XLSX original | Minas Gerais; origem específica pendente de confirmação; sete geometrias truncadas |
 
 Os dez CSVs de saúde estão disponíveis nas tabelas de Saúde.
@@ -103,6 +125,10 @@ ao parâmetro e ao método escolhido.
 
 O plano de perguntas, hipóteses e possíveis visualizações está em
 `docs/README.md`, mantido apenas no computador por escolha do responsável.
+Uma análise efetiva de 2024, com recortes, resultados e reprodução, está em
+`docs/analise_relacoes_2024/README.md`. Ela examina mudança das esperas, persistência
+das faltas e associação entre modalidades nas mesmas unidades, documentando por que
+o ano comum não cria uma correspondência direta entre exame municipal e unidade estadual.
 
 ## Gráficos e tratamentos
 
@@ -112,7 +138,7 @@ O plano de perguntas, hipóteses e possíveis visualizações está em
 |---|---|
 | Espera por exames | Como evoluiu a espera de um exame na capital? Série preservada, com regressão e IC |
 | Faltas por unidade | Quais unidades têm maior taxa de faltas no trimestre e na modalidade selecionados? Ranking preservado |
-| Faltas por tipo de consulta | Primeira consulta, interconsulta ou retorno: qual tem a maior média de faltas nas mesmas unidades? Barras com IC exploratório |
+| Faltas por tipo de consulta | Primeira consulta, interconsulta ou retorno: como variam as taxas nas mesmas unidades? Box plots com mediana, quartis e extremos; média e IC separados |
 | Comparação entre exames | Qual exame tem maior espera no último ano comum? Mamografia, ressonância e tomografia, sempre medindo agendamento até vaga |
 | Dificuldades de acesso | Quais temas aparecem mais nas manifestações ligadas a SP? Ranking preservado |
 | Chuva por mês | Em quais meses houve mais medições diárias acima do limiar? Janeiro–outubro/2026, com cobertura e denominadores documentados |
@@ -128,7 +154,10 @@ O filtro IQR é opcional e começa desligado. É possível escolher 1,5 ou 3 vez
 além de ICs de 90%, 95% ou 99%. A regressão da espera usa OLS com covariância HAC(1).
 A faixa representa a média ajustada do modelo, sem extrapolação. A comparação entre
 modalidades usa IC exploratório por bootstrap pareado das unidades no mesmo trimestre,
-preservando as três modalidades em cada reamostragem. A média simples entre unidades
+preservando as três modalidades em cada reamostragem. No box plot, caixas e bigodes
+mostram dispersão; o diamante amarelo e suas hastes mostram separadamente média e IC.
+O filtro IQR é independente da marcação de extremos no box plot. O CSV também inclui
+quartis, mediana, desvio padrão e variância. A média simples entre unidades
 não equivale à taxa de pacientes da rede. Taxas individuais sem denominador,
 médias anuais publicadas sem dispersão e contagens do acervo não
 recebem margens artificiais.
@@ -177,8 +206,10 @@ python app.py
 ```
 
 Abra [http://127.0.0.1:8050](http://127.0.0.1:8050). A execução também funciona
-por caminho absoluto a partir de outra pasta. Textos normais usam 12 px,
-descrições 10 px e títulos 16 px.
+por caminho absoluto a partir de outra pasta. A escala tipográfica é de 12 pt para textos,
+10 pt para descrições e 16 pt para títulos, em todas as páginas, tabelas, filtros e no
+simulador. São aproximadamente 16 px, 13,33 px e 21,33 px no navegador. Os gráficos
+usam a mesma conversão e preservam os tamanhos, sem redução automática das legendas.
 
 A primeira consulta de uma base prepara um cache local em `.cache/`. A tabela
 permite buscar, ordenar, paginar e baixar o CSV integral. O cache é descartável

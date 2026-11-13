@@ -34759,6 +34759,53 @@
       "source_url": "https://dados-abertos-observasampa.prefeitura.sp.gov.br/saude",
       "import_batch": "dados_salvar_2026-11-12",
       "dashboard_available": true
+    },
+    {
+      "source": "ocorrencias_hidrologicas_sp_2024_2026.csv",
+      "source_bytes": 557822,
+      "source_sha256": "918580e70c0533f8c3885a91c378f03bb36697aeb92bd45625b648b8f671c781",
+      "artifact": "enchentes/geosampa/ocorrencias_hidrologicas_sp_2024_2026.csv.gz",
+      "artifact_bytes": 75810,
+      "artifact_sha256": "f888cb004d9dddd1efef3f8756e6148870b68b57ba355fc8db474b041fba9797",
+      "csv_options": {
+        "encoding": "utf-8-sig",
+        "delimiter": ",",
+        "escapechar": null
+      },
+      "rows": 1700,
+      "columns": [
+        "id_registro",
+        "data_abertura",
+        "ano",
+        "mes",
+        "tipo_ocorrencia",
+        "municipio",
+        "cod_ibge_municipio",
+        "uf",
+        "subprefeitura",
+        "codigo_subprefeitura",
+        "longitude",
+        "latitude",
+        "x_sirgas2000_utm23s",
+        "y_sirgas2000_utm23s",
+        "arquivo_origem",
+        "indice_origem",
+        "referencia_original",
+        "fonte_url",
+        "coletado_em",
+        "possivel_duplicata_atributos"
+      ],
+      "group": "flood",
+      "source_format": "CSV preparado a partir de GeoPackages oficiais; não um CSV publicado diretamente pelo órgão",
+      "source_url": "https://download.geosampa.prefeitura.sp.gov.br/PaginasPublicas/downloadArquivo.aspx?orig=DownloadTemas&arq=07_Prote%E7%E3o%20e%20Defesa%20Civil%5COcorrencias%5CGPKG_ZIP%5CSIRGAS_GPKG_riscoocorrencia.zip&arqTipo=zip",
+      "metadata_urls": [
+        "https://metadados.geosampa.prefeitura.sp.gov.br/geonetwork/srv/api/records/432c06b1-03a1-4b1f-9210-423e1b58e869",
+        "https://metadados.geosampa.prefeitura.sp.gov.br/geonetwork/srv/api/records/9d08d20d-f6c7-463d-a349-c28c47babff2"
+      ],
+      "preparation_metadata": "fontes/enchentes_geosampa/coleta.json",
+      "reference_period": "2024-01-01 a 2026-09-30 (2026 parcial)",
+      "import_batch": "geosampa_2026-11-13",
+      "dashboard_available": false
     }
   ],
   "source_portal": "https://dadosabertos.sp.gov.br/",
@@ -37196,6 +37243,14 @@
       "source_csv_bytes": 481709584,
       "artifact_csv_bytes": 98660450,
       "coverage": "Todos os arquivos recebidos, sem filtro geográfico ou exclusão de registros; CSVs compactados sem perdas."
+    },
+    {
+      "date": "2026-11-13",
+      "source": "GeoSampa / COMDEC / SIGRC",
+      "csv_files": 1,
+      "records": 1700,
+      "coverage": "Município de São Paulo; ALAGAMENTO e INUNDACAO; 2024, 2025 e 2026 parcial",
+      "preparation_metadata": "fontes/enchentes_geosampa/coleta.json"
     }
   ]
 }

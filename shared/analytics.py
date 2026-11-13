@@ -90,19 +90,25 @@ def regression(x, y, confidence=0.95, temporal=False):
     else:
         result = model.fit(cov_type='HC3', use_t=True)
     grid = np.linspace(x.min(), x.max(), 100)
-    predicted = result.get_prediction(sm.add_constant(grid - offset, has_constant='add')).summary_frame(alpha=1-confidence)
-    ci = result.conf_int(alpha=1-confidence)
-    points = pd.DataFrame({'x': grid, 'ajuste': predicted['mean'].to_numpy(),
-                           'ic_inferior': predicted['mean_ci_lower'].to_numpy(),
-                           'ic_superior': predicted['mean_ci_upper'].to_numpy()})
+    design = sm.add_constant(grid - offset, has_constant='add')
+    points = pd.DataFrame({'x': grid, 'ajuste': result.predict(design)})
+    slope_ci = None
+    if confidence is not None:
+        predicted = result.get_prediction(design).summary_frame(alpha=1-confidence)
+        points['ic_inferior'] = predicted['mean_ci_lower'].to_numpy()
+        points['ic_superior'] = predicted['mean_ci_upper'].to_numpy()
+        ci = result.conf_int(alpha=1-confidence)
+        slope_ci = [float(ci[1, 0]), float(ci[1, 1])]
     if not np.isfinite(points.to_numpy()).all():
         return pd.DataFrame(), {'disponivel': False, 'motivo': 'O recorte não permite uma estimativa finita da incerteza.'}
     return points, {'disponivel': True, 'metodo': 'OLS com HAC(1)' if temporal else 'OLS com HC3',
-                    'nivel_confianca': confidence, 'n': len(x), 'inclinacao': float(result.params[1]),
-                    'ic_inclinacao': [float(ci[1, 0]), float(ci[1, 1])],
+                    'nivel_confianca': confidence, 'ic_ativo': confidence is not None,
+                    'n': len(x), 'inclinacao': float(result.params[1]), 'ic_inclinacao': slope_ci,
                     'r_quadrado': float(result.rsquared) if np.ptp(y) > 0 and np.isfinite(result.rsquared) else None,
                     'x_minimo': float(x.min()), 'x_maximo': float(x.max()),
-                    'observacao': 'IC pontual da média ajustada, condicional ao recorte e ao modelo. Sem extrapolação ou interpretação causal.'}
+                    'observacao': ('IC pontual da média ajustada, condicional ao recorte e ao modelo. '
+                                   if confidence is not None else 'IC desativado pelo usuário; intervalos não calculados. ')
+                                   + 'Sem extrapolação ou interpretação causal.'}
 
 
 def waiting(indicator, include_zeros, enabled, factor):
@@ -156,8 +162,13 @@ def absence_modalities(quarter, modalities, enabled, factor, confidence):
     if not cohort.empty:
         values = cohort.to_numpy(dtype=float)
         means = pd.DataFrame({'modalidade':cohort.columns, 'media':values.mean(axis=0), 'unidades':len(cohort)})
+        means['q1'] = cohort.quantile(.25).to_numpy()
+        means['mediana'] = cohort.quantile(.5).to_numpy()
+        means['q3'] = cohort.quantile(.75).to_numpy()
+        means['desvio_padrao'] = cohort.std(ddof=1).to_numpy()
+        means['variancia'] = cohort.var(ddof=1).to_numpy()
         means['ic_inferior'], means['ic_superior'] = np.nan, np.nan
-        if len(cohort) >= 5:
+        if confidence is not None and len(cohort) >= 5:
             rng = np.random.default_rng(20261112)
             draws = rng.integers(0, len(values), size=(2000, len(values)))
             boot = values[draws].mean(axis=1)
@@ -166,8 +177,10 @@ def absence_modalities(quarter, modalities, enabled, factor, confidence):
     return means, included, audit(['absenteismo'], **dedup, **info, invalidos_retirados=invalid,
         trimestre=quarter, coorte_completa_unidades=len(cohort),
         unidades_sem_todas_modalidades=int(len(matrix)-len(cohort)),
-        metodo_ic='Bootstrap percentil pareado por unidade, 2.000 reamostragens, semente 20261112; mínimo de cinco unidades',
-        nivel_confianca=confidence, ic_disponivel=len(cohort)>=5,
+        metodo_ic=('Bootstrap percentil pareado por unidade, 2.000 reamostragens, semente 20261112; mínimo de cinco unidades'
+                   if confidence is not None else 'IC desativado pelo usuário; bootstrap não executado'),
+        nivel_confianca=confidence, ic_ativo=confidence is not None, ic_disponivel=confidence is not None and len(cohort)>=5,
+        boxplot='Taxas por unidade e modalidade; quartis lineares; bigodes de 1,5 IQR; pontos externos são mantidos no gráfico, exceto se o filtro IQR separado for ativado. Caixa e bigodes descrevem dispersão, não IC.',
         limite='Média simples das taxas das mesmas unidades, não taxa ponderada de pacientes da rede. IC exploratório sob hipótese de unidades intercambiáveis; não mede efeito de lembretes.')
 
 
