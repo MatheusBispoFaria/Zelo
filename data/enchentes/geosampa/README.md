@@ -75,4 +75,4 @@ A data é de abertura do registro, não necessariamente o instante do início f�
 
 Dias sem linhas indicam ausência de registro neste extrato, sem comprovar ausência de alagamento. Estes dados permitem analisar ocorrências observadas e hipóteses; não fornecem, sozinhos, antecedência do alerta, probabilidade calibrada ou efeito do Zelo.
 
-As 646 bases anteriores não foram modificadas. O novo CSV compactado foi acrescentado ao manifesto; a aplicação ainda não ganhou gráficos ou seletores para esta base nesta etapa.
+As 646 bases anteriores não foram modificadas. O CSV compactado está registrado no manifesto e alimenta os gráficos de chuva e ocorrências e o ranking por subprefeitura da Visão geral. Os filtros e tratamentos atuam somente nas cópias analíticas; os dados originais permanecem preservados.

@@ -6,11 +6,13 @@ incluem avisos sonoros de enchentes.
 
 O dashboard reúne as bases públicas do estudo de caso, com foco de demonstração
 em São Paulo. Saúde e Enchentes oferecem tabelas e downloads dos CSVs
-originais. A Visão geral apresenta seis gráficos exploratórios, regressão linear,
+originais. A Visão geral apresenta oito gráficos exploratórios, regressão linear,
 intervalos de confiança e filtros aplicados somente a cópias analíticas.
 
-A Visão geral concentra os seis gráficos principais em um quadro: espera no centro,
-comparação entre exames e dificuldades à esquerda, faltas à direita e chuva mensal abaixo.
+A Visão geral concentra os gráficos em um quadro: espera no centro, comparação entre
+exames e dificuldades à esquerda e faltas à direita. Na faixa inferior ficam chuva
+acima do limiar à esquerda, a relação entre chuva e ocorrências no centro e o ranking
+de subprefeituras à direita.
 Fontes e tratamentos ficam nos ícones de informação. **Expandir** destaca o gráfico
 em uma área ampla; o controle passa a **Minimizar** para retornar ao quadro. Os filtros
 abrem em um pop-up. Os rankings laterais mostram quatro valores; a ampliação preserva os
@@ -21,7 +23,7 @@ Ela abre com a visão completa dos dados, independentemente do zoom anterior. A 
 do cartão mantém informações ao passar o mouse e usa a expansão para exploração visual.
 
 As informações dos gráficos abrem em janelas independentes da grade. Abrir ou fechar
-essas janelas preserva a posição dos seis cartões. O quadro tem proporções limitadas
+essas janelas preserva a posição dos oito cartões. O quadro tem proporções limitadas
 em telas grandes, com barras mais estreitas, linhas discretas e intervalos mais leves.
 
 Todos os campos do painel de filtros ficam abertos, sem seções recolhíveis.
@@ -52,6 +54,7 @@ gs_zelo/
     data_access.py
     data_view.py
     analytics.py         recortes e métodos estatísticos, sem escrever nas bases
+    flood_analysis.py    junção de ocorrências com chuva e ranking por subprefeitura
     simulation.py        cenários fictícios e algoritmo de Dijkstra
   assets/                estilos da interface
   data/                  bases compactadas, fontes e manifesto de integridade
@@ -132,7 +135,7 @@ o ano comum não cria uma correspondência direta entre exame municipal e unidad
 
 ## Gráficos e tratamentos
 
-`general.py` apresenta seis perguntas:
+`general.py` apresenta oito perguntas:
 
 | Gráfico | Pergunta e comparação |
 |---|---|
@@ -142,8 +145,11 @@ o ano comum não cria uma correspondência direta entre exame municipal e unidad
 | Comparação entre exames | Qual exame tem maior espera no último ano comum? Mamografia, ressonância e tomografia, sempre medindo agendamento até vaga |
 | Dificuldades de acesso | Quais temas aparecem mais nas manifestações ligadas a SP? Ranking preservado |
 | Chuva por mês | Em quais meses houve mais medições diárias acima do limiar? Janeiro–outubro/2026, com cobertura e denominadores documentados |
+| Chuva e ocorrências | Quando os registros coincidem com maiores acumulados medidos nas estações próximas? Em 2026, bolhas por data/estação; em 2025, comparação municipal dos dois meses disponíveis |
+| Locais com mais casos | Quais subprefeituras concentram mais registros do tipo e período selecionados? Ranking de contagens, sem interpretar como risco por habitante |
 
-Valores das barras e o período de referência aparecem no próprio quadro. Foram
+Valores das barras estão no hover e na ampliação; rankings e comparações também
+mostram rótulos na prévia. O período de referência aparece no cartão. Foram
 retiradas as séries de perda primária e evolução média das faltas, o ranking climático
 por estação e a associação chuva/leitos. As respectivas bases de saúde e clima
 continuam disponíveis para consulta. Não há painel de análises complementares.
@@ -173,6 +179,28 @@ As consultas de Saúde e Enchentes continuam lendo as bases originais.
 O botão **Baixar recortes e relatório** entrega um ZIP com CSVs derivados, critérios,
 exclusões por gráfico, limites IQR, modelos, nível de confiança e hashes das fontes.
 A documentação detalhada local está em `docs/graficos-metodologia.md`.
+
+Os gráficos 7 e 8 compartilham filtros de ano, mês, tipo e subprefeitura. É possível
+separar alagamentos e inundações. Em 2026, a associação usa a estação elegível mais
+próxima por distância Haversine, dentro do raio selecionado e com cobertura mínima.
+Lacunas não provocam troca de estação nem viram chuva zero. A data de abertura é
+interpretada como dia civil paulista, uma hipótese explícita porque a fonte não
+publica horário/fuso. A precipitação horária do INMET corresponde à hora anterior
+à mensagem; as horas são convertidas de UTC para São Paulo antes da soma diária.
+
+As janelas de 1, 3 ou 7 dias civis precisam de todos os dias completos; a defasagem
+permite encerrar a janela no mesmo dia, um ou dois dias antes da abertura. IQR atua
+uma vez por dia-estação, antes da associação aos chamados. A altura da bolha mostra
+chuva em milímetros; a área mostra o número de registros da mesma data e estação.
+O ranking inclui os casos sem associação válida com chuva. Não há IC artificial
+para essas medições e contagens, nem conversão da chuva em gravidade da inundação.
+
+Em 2025, a comparação usa somente chuva municipal de setembro e outubro, sem
+atribuir a média da capital a cada ponto. Em 2024, o ranking funciona e o gráfico
+central informa a falta de precipitação correspondente. Unificar atributos
+idênticos é uma opção desligada por padrão, aplicada somente à cópia analítica;
+nenhuma linha da fonte é apagada. Fontes, critérios e exclusões ficam no ícone
+de informação e no ZIP de recortes. Detalhes em `docs/chuva-ocorrencias-dashboard.md`.
 
 ## Simulador de alerta
 
