@@ -1,296 +1,72 @@
 # Zelo
 
-Zelo é a proposta de um assistente virtual para o cidadão, acessado pelo celular,
-com foco no acompanhamento e gerenciamento de consultas no SUS. Módulos de apoio
-incluem avisos sonoros de enchentes.
+Zelo é a proposta de um assistente virtual para ajudar o cidadão a acompanhar e gerenciar consultas no SUS, com um módulo de apoio para avisos de enchentes.
 
-O dashboard reúne as bases públicas do estudo de caso, com foco de demonstração
-em São Paulo. Saúde e Enchentes oferecem tabelas e downloads dos CSVs
-originais. A Visão geral apresenta oito gráficos exploratórios, regressão linear,
-intervalos de confiança e filtros aplicados somente a cópias analíticas.
+Este repositório apresenta o **dashboard do estudo de caso**, com foco em São Paulo. Ele reúne dados públicos, análises exploratórias e uma simulação da experiência de receber um alerta.
 
-A Visão geral concentra os gráficos em um quadro: espera no centro, comparação entre
-exames e dificuldades à esquerda e faltas à direita. Na faixa inferior ficam chuva
-acima do limiar à esquerda, a relação entre chuva e ocorrências no centro e o ranking
-de subprefeituras à direita.
-Fontes e tratamentos ficam nos ícones de informação. **Expandir** destaca o gráfico
-em uma área ampla; o controle passa a **Minimizar** para retornar ao quadro. Os filtros
-abrem em um pop-up. Os rankings laterais mostram quatro valores; a ampliação preserva os
-12 valores do ranking completo, sem mudar os recortes exportados.
+## Explore o dashboard
 
-A área ampliada mostra os nomes completos dos rankings e tem **Restaurar enquadramento**.
-Ela abre com a visão completa dos dados, independentemente do zoom anterior. A prévia
-do cartão mantém informações ao passar o mouse e usa a expansão para exploração visual.
+Use os atalhos da Home ou o menu lateral para acessar cada área. As colunas da Home revelam seu conteúdo ao passar o mouse ou receber foco pelo teclado.
 
-As informações dos gráficos abrem em janelas independentes da grade. Abrir ou fechar
-essas janelas preserva a posição dos oito cartões. O quadro tem proporções limitadas
-em telas grandes, com barras mais estreitas, linhas discretas e intervalos mais leves.
-
-Todos os campos do painel de filtros ficam abertos, sem seções recolhíveis.
-O pop-up de filtros tem uma área mais ampla. Em **Intervalos de confiança**, a opção
-**Desativar IC** mantém a regressão e as distribuições, sem calcular ou exibir os
-intervalos; o download registra essa escolha. Caixas e bigodes do box plot continuam
-visíveis porque descrevem dispersão, não confiança.
-
-O menu lateral começa recolhido. Passar o mouse na borda esquerda destaca o botão
-do menu e mostra **Clique no Menu para expandir**. A dica também aparece ao focar
-o botão pelo teclado; a expansão acontece pelo clique. A barra desliza ao abrir
-e recolher. Páginas e pop-ups têm transições curtas; Escape, clique fora e a
-restauração do foco continuam disponíveis. A preferência de movimento reduzido
-desativa as animações.
-
-A Home reúne **Saúde, Enchentes, Visão geral e Simulador** em quatro colunas.
-Elas começam mostrando os ícones e se expandem ao passar o mouse ou receber
-foco pelo teclado, revelando título e uma introdução breve. No celular, um toque
-revela o conteúdo e o segundo abre a página.
-
-O **Simulador de alerta** demonstra um aviso de alagamento, com mapa, celular
-animado, som breve e uma rota calculada por Dijkstra até um abrigo fictício.
-
-## Organização
-
-```text
-gs_zelo/
-  app.py                 entrada da aplicação e navegação
-  home.py                apresentação do Zelo
-  general.py             gráficos e perguntas do estudo de caso
-  health.py              consulta às bases do SUS e de acesso à saúde
-  flood.py               consulta a ocorrências, chuva municipal e estações INMET
-  simulator.py           demonstração de alerta, mapa e trajeto fictício
-  shared/                componentes e acesso aos dados; não são páginas
-    components.py
-    data_access.py
-    data_view.py
-    analytics.py         recortes e métodos estatísticos, sem escrever nas bases
-    flood_analysis.py    junção de ocorrências com chuva e ranking por subprefeitura
-    simulation.py        cenários fictícios e algoritmo de Dijkstra
-    simulation_network.json  recorte de ruas do OpenStreetMap, sob ODbL
-  assets/                estilos da interface
-  data/                  bases compactadas, fontes e manifesto de integridade
-    clima/inmet/2026/    estações de todas as UFs, separadas por UF
-    clima/precipitacao_mg/
-    enchentes/geosampa/   1.700 registros oficiais de alagamento e inundação
-    saude/indicadores/
-    saude/hospitais_leitos/
-    saude/ouvidorsus/
-    saude/telessaude/
-    fontes/
-  docs/                  estudo e perguntas de pesquisa; somente local
-  tests/                 verificações técnicas; somente local
-  backup/                cópias pessoais; somente local
-```
-
-As páginas são Início (`/`), Visão geral (`/geral`), Saúde (`/saude`),
-Enchentes (`/enchentes`) e Simulador (`/simulador`). O menu lateral conecta todas
-as páginas e a Home oferece os quatro atalhos. A identidade visual usa verde profundo, fundo creme
-e amarelo; os seletores de bases são campos dentro das páginas.
-
-## Dados e procedência
-
-Há **647 CSVs compactados**: duas bases de chuva anteriores, 644 incorporadas de
-`dados_salvar` e uma base preparada a partir dos GeoPackages oficiais da COMDEC/GeoSampa.
-A importação também preserva a planilha XLSX, os links de origem,
-os metadados e as evidências da coleta de indicadores. Todos os 990 arquivos
-recebidos nessa pasta têm correspondência registrada no manifesto.
-
-Os CSVs estão em **`.csv.gz`**, com compactação sem perdas. As 646 bases anteriores
-mantêm os bytes dos CSVs de origem. A nova base de ocorrências foi extraída dos
-GeoPackages, filtrada por tipo e convertida para CSV, com as transformações
-documentadas em `data/enchentes/geosampa/README.md`. Cada CSV foi descompactado
-para conferência e comparado ao original por SHA-256. A pasta pessoal de origem
-permanece intacta. As cópias descompactadas não são necessárias à execução.
-
-| Fonte | Conteúdo incorporado | Abrangência e ressalva principal |
-|---|---|---|
-| [Dados Abertos SP / SP Águas](https://dadosabertos.sp.gov.br/) | Chuva e índices municipais | Setembro e outubro de 2025 |
-| [SES-SP](https://portaldatransparencia.saude.sp.gov.br/indicadores.php) | Taxas de absenteísmo | 61 unidades ambulatoriais; 2024-T1 a 2025-T1; não é toda a rede SUS |
-| [ObservaSampa](https://dados-abertos-observasampa.prefeitura.sp.gov.br/saude) | Espera por exames e perda primária de consultas | Capital paulista; período e nível territorial variam por indicador |
-| [Ministério da Saúde](https://dadosabertos.saude.gov.br/) | Hospitais/leitos, OuvidorSUS 2 e quatro indicadores de telessaúde | Bases nacionais preservadas; o recorte SP deve ser explícito na análise |
-| [INMET](https://portal.inmet.gov.br/dadoshistoricos) | 634 estações horárias de 2026 | Brasil; 41 estações em SP; janeiro a outubro de 2026, com lacunas de medição |
-| [COMDEC / GeoSampa](https://metadados.geosampa.prefeitura.sp.gov.br/geonetwork/srv/api/records/432c06b1-03a1-4b1f-9210-423e1b58e869) | 1.700 registros datados e georreferenciados de alagamento e inundação | Capital; 2024, 2025 e 2026 parcial até setembro; data de abertura, sem horário |
-| Camada de precipitação média anual de MG | XLSX original | Minas Gerais; origem específica pendente de confirmação; sete geometrias truncadas |
-
-**Todos os 647 CSVs estão disponíveis nas páginas de consulta**: dez em Saúde
-e 637 em Enchentes. Em Enchentes, o seletor **Conteúdo** separa as ocorrências
-GeoSampa, as duas bases municipais e os 634 arquivos de estações do INMET.
-As estações começam no recorte SP (41 arquivos); **UF da estação** permite
-escolher outra UF ou consultar todas. Os campos, as contagens e a fonte acompanham
-a seleção. A planilha auxiliar de MG tem download próprio em seu formato XLSX.
-
-A consulta INMET lê as oito linhas de identificação da estação antes da tabela.
-A coluna final sem nome permanece no arquivo e no cache; a interface a identifica
-como **Coluna sem nome (20)**. O download entrega todos os bytes originais,
-incluindo cabeçalho da estação, valores ausentes e delimitadores. Os arquivos
-compactados não foram reescritos. A Visão geral utiliza as estações de SP conforme
-os recortes documentados; o XLSX de MG continua fora dos gráficos de SP.
-
-Os períodos exibidos correspondem às competências presentes no acervo. Leitos
-2026 vai de janeiro a setembro. As bases de telessaúde têm competências específicas,
-com a indicação dos meses publicados, sem pressupor uma série mensal contínua.
-
-`data/manifest.json` registra os caminhos, formatos de leitura, quantidade de
-registros e hashes. `data/fontes/links_origem.txt` preserva o TXT recebido.
-`data/fontes/coleta_indicadores/` mantém os filtros e os metadados das três
-bases de indicadores coletadas dos portais; `evidencias.zip` guarda as respostas originais
-com seus nomes dentro de `evidencias/`.
-
-## Interpretação
-
-Chuva e SPI ajudam a investigar condições associadas a enchentes. Identificar
-locais com alagamentos recorrentes exige também ocorrências observadas.
-
-Espera por exame, falta a consulta, vaga não agendada e capacidade hospitalar são
-medidas diferentes. Os extratos não descrevem a fila operacional de uma UPA.
-Os valores originais, incluindo zeros e percentuais fora da faixa esperada,
-continuam preservados para revisão. As bases contextualizam problemas; medir
-tempo economizado ou outro efeito do Zelo exige dados de sua utilização e um
-desenho de avaliação. Intervalos de confiança dependem dos dados necessários
-ao parâmetro e ao método escolhido.
-
-O plano de perguntas, hipóteses e possíveis visualizações está em
-`docs/README.md`, mantido apenas no computador por escolha do responsável.
-Uma análise efetiva de 2024, com recortes, resultados e reprodução, está em
-`docs/analise_relacoes_2024/README.md`. Ela examina mudança das esperas, persistência
-das faltas e associação entre modalidades nas mesmas unidades, documentando por que
-o ano comum não cria uma correspondência direta entre exame municipal e unidade estadual.
-
-## Gráficos e tratamentos
-
-`general.py` apresenta oito perguntas:
-
-| Gráfico | Pergunta e comparação |
+| Área | O que fazer |
 |---|---|
-| Espera por exames | Como evoluiu a espera de um exame na capital? Série preservada, com regressão e IC |
-| Faltas por unidade | Quais unidades têm maior taxa de faltas no trimestre e na modalidade selecionados? Ranking preservado |
-| Faltas por tipo de consulta | Primeira consulta, interconsulta ou retorno: como variam as taxas nas mesmas unidades? Box plots com mediana, quartis e extremos; média e IC separados |
-| Comparação entre exames | Qual exame tem maior espera no último ano comum? Mamografia, ressonância e tomografia, sempre medindo agendamento até vaga |
-| Dificuldades de acesso | Quais temas aparecem mais nas manifestações ligadas a SP? Ranking preservado |
-| Chuva por mês | Em quais meses houve mais medições diárias acima do limiar? Janeiro–outubro/2026, com cobertura e denominadores documentados |
-| Chuva e ocorrências | Quando os registros coincidem com maiores acumulados medidos nas estações próximas? Em 2026, bolhas por data/estação; em 2025, comparação municipal dos dois meses disponíveis |
-| Locais com mais casos | Quais subprefeituras concentram mais registros do tipo e período selecionados? Ranking de contagens, sem interpretar como risco por habitante |
+| **Saúde** | Consulte faltas, espera por exames, hospitais e leitos, ouvidoria e telessaúde. |
+| **Enchentes** | Separe alagamentos e inundações; examine chuva municipal e estações do INMET por UF. |
+| **Visão geral** | Compare os dados em oito gráficos, com filtros, regressão linear e intervalos de confiança. |
+| **Simulador** | Escolha o cenário, a localização hipotética e a posição de três abrigos. Dispare o alerta e acompanhe a rota. |
 
-Valores das barras estão no hover e na ampliação; rankings e comparações também
-mostram rótulos na prévia. O período de referência aparece no cartão. Foram
-retiradas as séries de perda primária e evolução média das faltas, o ranking climático
-por estação e a associação chuva/leitos. As respectivas bases de saúde e clima
-continuam disponíveis para consulta. Não há painel de análises complementares.
-Eles dão contexto às perguntas selecionadas; o efeito do uso do Zelo ainda exige
-uma avaliação com participantes ou registros operacionais da intervenção.
+Nos gráficos, use **Expandir** para explorar e o ícone **i** para consultar fontes e métodos. **Baixar recortes** exporta os CSVs derivados e o relatório com os critérios da análise. Nas páginas de dados, busque, ordene e baixe os arquivos completos.
 
-O filtro IQR é opcional e começa desligado. É possível escolher 1,5 ou 3 vezes o IQR,
-além de ICs de 90%, 95% ou 99%. A regressão da espera usa OLS com covariância HAC(1).
-A faixa representa a média ajustada do modelo, sem extrapolação. A comparação entre
-modalidades usa IC exploratório por bootstrap pareado das unidades no mesmo trimestre,
-preservando as três modalidades em cada reamostragem. No box plot, caixas e bigodes
-mostram dispersão; o diamante amarelo e suas hastes mostram separadamente média e IC.
-O filtro IQR é independente da marcação de extremos no box plot. O CSV também inclui
-quartis, mediana, desvio padrão e variância. A média simples entre unidades
-não equivale à taxa de pacientes da rede. Taxas individuais sem denominador,
-médias anuais publicadas sem dispersão e contagens do acervo não
-recebem margens artificiais.
+## Execute localmente
 
-Os recortes convertem valores para números e retiram registros inválidos somente
-da análise. Os zeros publicados de espera são opcionais e começam excluídos até
-esclarecer sua interpretação. Repetições com chave de evento confirmada são
-conferidas; conflitos são separados. Na ouvidoria, linhas iguais são mantidas,
-pois a ausência de identificador não permite declará-las o mesmo evento.
-
-**Nenhum arquivo de `data/` foi corrigido, sobrescrito ou substituído para os gráficos.**
-As consultas de Saúde e Enchentes continuam lendo as bases originais.
-O botão **Baixar recortes e relatório** entrega um ZIP com CSVs derivados, critérios,
-exclusões por gráfico, limites IQR, modelos, nível de confiança e hashes das fontes.
-A documentação detalhada local está em `docs/graficos-metodologia.md`.
-
-Os gráficos 7 e 8 compartilham filtros de ano, mês, tipo e subprefeitura. É possível
-separar alagamentos e inundações. Em 2026, a associação usa a estação elegível mais
-próxima por distância Haversine, dentro do raio selecionado e com cobertura mínima.
-Lacunas não provocam troca de estação nem viram chuva zero. A data de abertura é
-interpretada como dia civil paulista, uma hipótese explícita porque a fonte não
-publica horário/fuso. A precipitação horária do INMET corresponde à hora anterior
-à mensagem; as horas são convertidas de UTC para São Paulo antes da soma diária.
-
-As janelas de 1, 3 ou 7 dias civis precisam de todos os dias completos; a defasagem
-permite encerrar a janela no mesmo dia, um ou dois dias antes da abertura. IQR atua
-uma vez por dia-estação, antes da associação aos chamados. A altura da bolha mostra
-chuva em milímetros; a área mostra o número de registros da mesma data e estação.
-O ranking inclui os casos sem associação válida com chuva. Não há IC artificial
-para essas medições e contagens, nem conversão da chuva em gravidade da inundação.
-
-Em 2025, a comparação usa somente chuva municipal de setembro e outubro, sem
-atribuir a média da capital a cada ponto. Em 2024, o ranking funciona e o gráfico
-central informa a falta de precipitação correspondente. Unificar atributos
-idênticos é uma opção desligada por padrão, aplicada somente à cópia analítica;
-nenhuma linha da fonte é apagada. Fontes, critérios e exclusões ficam no ícone
-de informação e no ZIP de recortes. Detalhes em `docs/chuva-ocorrencias-dashboard.md`.
-
-## Simulador de alerta
-
-Escolha uma das três posições hipotéticas, um cenário e uma das três variações
-de contorno: núcleos dispersos, manchas alongadas ou áreas irregulares. O cenário
-pode ter alagamento localizado, ampliado ou origem sem saída. Há **três abrigos,
-A, B e C**, cada um com nove posições selecionáveis. As posições precisam ser diferentes.
-Alterar uma escolha reinicia o cenário. **Simular alerta** mostra o aviso vermelho,
-anima o celular e reproduz um som breve, que pode ser desativado. A vibração física
-depende do navegador e do aparelho; a animação também funciona no computador.
-**Repetir aviso** repete os efeitos e **Reiniciar** limpa o cenário e interrompe os efeitos.
-
-O fundo é um mapa do [OpenStreetMap](https://www.openstreetmap.org/copyright),
-exibido com [Leaflet 1.9.4](https://leafletjs.com/reference-1.9.4.html).
-O enquadramento fica limitado ao recorte do centro de São Paulo, sem arraste,
-zoom por rolagem, duplo clique, toque ou teclado. O recorte inteiro se ajusta ao
-tamanho disponível; o mapa externo à área fica oculto. O celular tem uma área
-separada e não cobre os caminhos. O fundo precisa de conexão; a rede vetorial
-continua disponível sem ele.
-
-As curvas e os cruzamentos vêm de um recorte público do OpenStreetMap, incluído
-em `shared/simulation_network.json`. São 1.180 nós e 1.724 trechos em uma rede
-demonstrativa a pé; as coordenadas intermediárias foram preservadas, sem atalhos
-retos entre cruzamentos. Fonte, consulta, filtros, data e hash da resposta estão
-no próprio arquivo. Dados viários: © OpenStreetMap contributors,
-[ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/).
-Não há validação operacional dos acessos, escadas ou restrições atuais.
-**Localização, áreas alagadas e abrigos são simulados**, sem GPS. Não são
-ocorrências, abrigos operacionais confirmados ou previsões das bases históricas.
-
-Dijkstra remove os trechos que entram ou tocam uma área alagada, considerando
-toda a geometria do caminho. Depois minimiza, nesta ordem:
-
-1. Soma de `distância do trecho × peso de exposição`.
-2. Distância total, somente quando a exposição é igual.
-
-Os pesos didáticos são 0,65 a menos de 35 m da área simulada, 0,30 de 35 a menos
-de 90 m e zero além disso. A proximidade considera a menor distância entre o
-trecho completo e o contorno. São faixas esquemáticas, sem probabilidade ou
-segurança calibradas. Uma rota sem exposição vence uma exposta mesmo sendo mais
-longa. Os três abrigos são comparados; o painel indica o escolhido e quais estão
-acessíveis ou sem acesso. Não se estima tempo de viagem. Se não houver caminho,
-o sistema informa **trajeto indisponível**. As bases de `data/` continuam intocadas.
-As premissas também estão no ícone de informação da tela e em `docs/simulador.md`.
-
-## Executar
-
-Com Python 3.11 ou superior:
+Com **Python 3.11 ou superior**, execute na pasta do projeto:
 
 ```sh
 python -m pip install -r requirements.txt
 python app.py
 ```
 
-Abra [http://127.0.0.1:8050](http://127.0.0.1:8050). A execução também funciona
-por caminho absoluto a partir de outra pasta. A escala tipográfica é de 12 pt para textos,
-10 pt para descrições e 16 pt para títulos, em todas as páginas, tabelas, filtros e no
-simulador. São aproximadamente 16 px, 13,33 px e 21,33 px no navegador. Os gráficos
-usam a mesma conversão e preservam os tamanhos, sem redução automática das legendas.
+Abra [http://127.0.0.1:8050](http://127.0.0.1:8050). A aplicação lê os arquivos compactados diretamente.
 
-A primeira consulta de uma base prepara um cache local em `.cache/`. A tabela
-permite buscar, ordenar, paginar e baixar o CSV integral. O cache é descartável
-e pode ser removido com o aplicativo fechado.
+Interface em **Dash e Plotly**, com análise de dados em pandas, SciPy e statsmodels. As versões estão em [requirements.txt](requirements.txt).
 
-`docs/`, `backup/`, `tests/`, caches e CSVs descompactados em `data/` são ignorados
-pelo Git. As verificações em `tests/test_dashboard.py` tratam da leitura dos dados
-e do funcionamento do dashboard e permanecem disponíveis somente no ambiente local.
-Não precisam estar no Git para o aplicativo funcionar.
+## Dados e fontes
 
-O módulo de transporte e suas quatro bases foram retirados do projeto ativo.
-Cópias integrais continuam apenas em `backup/transporte_removido_2026-11-12/`,
-ignorado pelo Git; os commits anteriores continuam preservando o histórico.
+O acervo contém **647 CSVs em `.csv.gz`**, compactados sem perdas: **10 de Saúde e 637 de Enchentes**. As abrangências variam entre capital paulista, estado e Brasil; cada seleção informa seu período e sua fonte.
+
+| Fonte | Conteúdo | Recorte disponível |
+|---|---|---|
+| [SP Águas](https://dadosabertos.sp.gov.br/) | Chuva acumulada e índices municipais | Estado de SP; setembro e outubro de 2025 |
+| [SES-SP](https://portaldatransparencia.saude.sp.gov.br/indicadores.php) | Taxas de faltas às consultas | 61 unidades; 2024-T1 a 2025-T1 |
+| [ObservaSampa](https://dados-abertos-observasampa.prefeitura.sp.gov.br/saude) | Espera por exames e vagas não agendadas | Capital paulista; períodos por indicador |
+| [Ministério da Saúde](https://dadosabertos.saude.gov.br/) | Hospitais, leitos, OuvidorSUS e telessaúde | Brasil; competências indicadas em cada base |
+| [INMET](https://portal.inmet.gov.br/dadoshistoricos) | Registros horários de 634 estações, sendo 41 em SP | Janeiro a outubro de 2026 |
+| [COMDEC / GeoSampa](https://metadados.geosampa.prefeitura.sp.gov.br/geonetwork/srv/api/records/432c06b1-03a1-4b1f-9210-423e1b58e869) | 1.700 registros de alagamento e inundação | Capital; 2024, 2025 e 2026 parcial até setembro |
+
+Consulte formatos, contagens e hashes no [manifesto de dados](data/manifest.json). A conversão dos GeoPackages oficiais para CSV está descrita no [README da base GeoSampa](data/enchentes/geosampa/README.md).
+
+Há também um XLSX auxiliar de precipitação de Minas Gerais, disponível para consulta e fora dos gráficos de SP. Sua origem específica permanece pendente de confirmação.
+
+## Interprete os resultados
+
+- **Análise exploratória:** as bases ajudam a investigar os problemas que o Zelo pretende abordar. Medir tempo economizado ou redução de faltas exige uma avaliação do uso do assistente.
+- **Tratamento transparente:** o filtro IQR e os demais recortes atuam em cópias analíticas. Os arquivos de origem permanecem preservados; métodos, exclusões e intervalos de confiança estão documentados nos gráficos e no relatório exportado.
+- **Simulação:** localização, alagamentos e abrigos são fictícios. Dijkstra exclui trechos alagados e prioriza menor exposição; a distância apenas desempata. A demonstração não valida uma rota de evacuação real.
+
+A rede de ruas usa dados de © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), sob [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/).
+
+## Organização
+
+```text
+app.py          inicialização e navegação
+home.py         apresentação e atalhos
+general.py      gráficos e perguntas do estudo
+health.py       consulta às bases de saúde
+flood.py        consulta às ocorrências e à precipitação
+simulator.py    experiência de alerta
+shared/         componentes, leitura, análises e cálculo de rotas
+assets/         estilos e interações
+data/           bases compactadas e metadados
+```
+
+`docs/`, `tests/` e `backup/` são conteúdos locais, ignorados pelo Git.
