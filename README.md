@@ -39,6 +39,11 @@ e recolher. Páginas e pop-ups têm transições curtas; Escape, clique fora e a
 restauração do foco continuam disponíveis. A preferência de movimento reduzido
 desativa as animações.
 
+A Home reúne **Saúde, Enchentes, Visão geral e Simulador** em quatro colunas.
+Elas começam mostrando os ícones e se expandem ao passar o mouse ou receber
+foco pelo teclado, revelando título e uma introdução breve. No celular, um toque
+revela o conteúdo e o segundo abre a página.
+
 O **Simulador de alerta** demonstra um aviso de alagamento, com mapa, celular
 animado, som breve e uma rota calculada por Dijkstra até um abrigo fictício.
 
@@ -50,7 +55,7 @@ gs_zelo/
   home.py                apresentação do Zelo
   general.py             gráficos e perguntas do estudo de caso
   health.py              consulta às bases do SUS e de acesso à saúde
-  flood.py               consulta às bases municipais de precipitação
+  flood.py               consulta a ocorrências, chuva municipal e estações INMET
   simulator.py           demonstração de alerta, mapa e trajeto fictício
   shared/                componentes e acesso aos dados; não são páginas
     components.py
@@ -76,8 +81,8 @@ gs_zelo/
 ```
 
 As páginas são Início (`/`), Visão geral (`/geral`), Saúde (`/saude`),
-Enchentes (`/enchentes`) e Simulador (`/simulador`). A navegação entre páginas
-fica somente no menu lateral. A identidade visual usa verde profundo, fundo creme
+Enchentes (`/enchentes`) e Simulador (`/simulador`). O menu lateral conecta todas
+as páginas e a Home oferece os quatro atalhos. A identidade visual usa verde profundo, fundo creme
 e amarelo; os seletores de bases são campos dentro das páginas.
 
 ## Dados e procedência
@@ -105,11 +110,23 @@ permanece intacta. As cópias descompactadas não são necessárias à execuçã
 | [COMDEC / GeoSampa](https://metadados.geosampa.prefeitura.sp.gov.br/geonetwork/srv/api/records/432c06b1-03a1-4b1f-9210-423e1b58e869) | 1.700 registros datados e georreferenciados de alagamento e inundação | Capital; 2024, 2025 e 2026 parcial até setembro; data de abertura, sem horário |
 | Camada de precipitação média anual de MG | XLSX original | Minas Gerais; origem específica pendente de confirmação; sete geometrias truncadas |
 
-Os dez CSVs de saúde estão disponíveis nas tabelas de Saúde.
-Os 634 CSVs do INMET estão preservados em `data/clima/inmet/2026/`, com seus
-cabeçalhos originais de estação. A Visão geral utiliza as 41 estações de SP, com
-cobertura mínima selecionável e totais diários UTC apenas quando há 24 horas válidas.
-A planilha de MG permanece preservada para avaliação e não entra nos gráficos de SP.
+**Todos os 647 CSVs estão disponíveis nas páginas de consulta**: dez em Saúde
+e 637 em Enchentes. Em Enchentes, o seletor **Conteúdo** separa as ocorrências
+GeoSampa, as duas bases municipais e os 634 arquivos de estações do INMET.
+As estações começam no recorte SP (41 arquivos); **UF da estação** permite
+escolher outra UF ou consultar todas. Os campos, as contagens e a fonte acompanham
+a seleção. A planilha auxiliar de MG tem download próprio em seu formato XLSX.
+
+A consulta INMET lê as oito linhas de identificação da estação antes da tabela.
+A coluna final sem nome permanece no arquivo e no cache; a interface a identifica
+como **Coluna sem nome (20)**. O download entrega todos os bytes originais,
+incluindo cabeçalho da estação, valores ausentes e delimitadores. Os arquivos
+compactados não foram reescritos. A Visão geral utiliza as estações de SP conforme
+os recortes documentados; o XLSX de MG continua fora dos gráficos de SP.
+
+Os períodos exibidos correspondem às competências presentes no acervo. Leitos
+2026 vai de janeiro a setembro. As bases de telessaúde têm competências específicas,
+com a indicação dos meses publicados, sem pressupor uma série mensal contínua.
 
 `data/manifest.json` registra os caminhos, formatos de leitura, quantidade de
 registros e hashes. `data/fontes/links_origem.txt` preserva o TXT recebido.

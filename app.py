@@ -13,7 +13,7 @@ import health
 import home
 import simulator
 from shared.components import icon
-from shared.data_access import DATA_DIR, DATASETS, metadata
+from shared.data_access import AUXILIARY, DATA_DIR, DATASETS, metadata
 from shared.data_view import register_callbacks
 from shared.simulation import DEFAULT_SHELTERS, simulate_route
 
@@ -146,6 +146,13 @@ def create_app():
         if not source.is_file():
             abort(404)
         return send_file(source, as_attachment=True, download_name=source.name)
+
+    @application.server.get("/download-asset/<key>")
+    def download_auxiliary(key):
+        if key not in AUXILIARY:abort(404)
+        source=DATA_DIR/AUXILIARY[key]["file"]
+        if not source.is_file():abort(404)
+        return send_file(source,as_attachment=True,download_name=source.name)
 
     return application
 

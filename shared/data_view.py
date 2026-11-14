@@ -7,29 +7,45 @@ import sqlite3
 from dash import Input, Output, State, ctx, dcc, html
 
 from .components import format_int, icon
-from .data_access import DATASETS, metadata, query_page
+from .data_access import AUXILIARY, DATASETS, FAMILIES, STATES, dataset_keys, metadata, query_page
 
 logger = logging.getLogger(__name__)
 
 
 def dataset_view(scope, title, symbol, description, note, *, heading_level=1):
-    keys = [key for key, config in DATASETS.items() if config["group"] == scope]
+    keys = dataset_keys(scope,"ocorrencias" if scope=="flood" else None)
     selected = keys[0]
     meta = metadata(selected)
-    column_options = [{"label": name, "value": name} for name in meta["columns"]]
+    column_options = _column_options(meta["columns"])
+    picker=[]
+    if scope=="flood":
+        picker.extend([
+            html.Div([html.Label("Conteúdo",htmlFor="flood-family"),
+                      dcc.Dropdown(id="flood-family",options=[{"label":label,"value":key} for key,label in FAMILIES.items()],
+                                   value="ocorrencias",clearable=False,className="zelo-select")],className="catalog-field"),
+            html.Div([html.Label("UF da estação",htmlFor="flood-uf"),
+                      dcc.Dropdown(id="flood-uf",options=[{"label":"Todas as UFs","value":"all"},
+                                   *[{"label":uf,"value":uf} for uf in STATES]],value="SP",disabled=True,
+                                   clearable=False,className="zelo-select")],className="catalog-field"),
+        ])
+    picker.append(html.Div([html.Label("Base de dados", htmlFor=f"{scope}-dataset"),
+                            dcc.Dropdown(id=f"{scope}-dataset",options=_dataset_options(keys),value=selected,
+                                         clearable=False,className="zelo-select dataset-select")],className="catalog-field"))
+    if scope=="flood":picker.append(html.P("Ocorrências oficiais de alagamento e inundação na capital paulista.",
+                                           id="flood-catalog-count",className="description catalog-count"))
     return html.Div([
         html.Div([
             html.Div([html.Span(icon(symbol, "#278e77"), className="page-symbol"),
                       html.Div([(html.H1 if heading_level == 1 else html.H2)(title), html.P(description, className="description")])], className="page-heading"),
-            html.Span("Consulta de dados", className="small-badge"),
+            html.Span(f"{len(dataset_keys(scope))} bases CSV", className="small-badge"),
         ], className="page-intro"),
         html.Section([
-            html.Div([html.Label("Base de dados", htmlFor=f"{scope}-dataset"),
-                      dcc.Dropdown(id=f"{scope}-dataset", options=[{"label": DATASETS[key]["label"], "value": key} for key in keys],
-                                   value=selected, clearable=False, className="zelo-select dataset-select")], className="dataset-picker"),
+            html.Div(picker,className="dataset-picker"+(" catalog-picker" if scope=="flood" else "")),
             html.Div([
                 html.Div([html.H2(id=f"{scope}-table-title", children=meta["title"]),
-                          html.P(id=f"{scope}-meta", children=_meta_text(meta), className="description")], className="table-heading-copy"),
+                          html.P(id=f"{scope}-meta", children=_meta_text(meta), className="description"),
+                          html.P(id=f"{scope}-file",children=meta["source"],className="description dataset-file"),
+                          html.P(id=f"{scope}-table-note",children=meta.get("table_note",""),className="description dataset-context")], className="table-heading-copy"),
                 html.A([icon("download", "#227e68"), "Baixar CSV"], id=f"{scope}-download",
                        href=f"/download/{selected}", className="button button-download"),
             ], className="table-heading"),
@@ -71,11 +87,27 @@ def dataset_view(scope, title, symbol, description, note, *, heading_level=1):
             ], className="table-footer"),
         ], className="panel data-panel"),
         html.Div([html.Span(className="status-dot"), html.P(note, className="description")], className="data-note"),
+        *[html.Div([html.Span("Base auxiliar",className="description"),
+                    html.A([icon("download"),asset["label"]],href=f"/download-asset/{key}",className="button"),
+                    html.P("Minas Gerais; preservada para consulta, fora do recorte de São Paulo.",className="description")],
+                   className="data-auxiliary") for key,asset in AUXILIARY.items() if asset["group"]==scope],
     ], className="data-page")
 
 
 def _meta_text(meta):
-    return f"{meta['period']} · {format_int(meta['rows'])} registros · {len(meta['columns'])} campos · {meta['source']}"
+    return f"{meta['period']} · {format_int(meta['rows'])} registros · {len(meta['columns'])} campos · {meta['publisher']}"
+
+
+def _column_label(name,index):
+    return name if name else f"Coluna sem nome ({index+1})"
+
+
+def _column_options(columns):
+    return [{"label":_column_label(name,index),"value":name} for index,name in enumerate(columns)]
+
+
+def _dataset_options(keys):
+    return [{"label":DATASETS[key]["label"],"value":key} for key in keys]
 
 
 def _page_button(scope, action, label, symbol):
@@ -92,7 +124,8 @@ def render_table(result):
     offset = result["page"] * result["page_size"]
     return html.Div(html.Table([
         html.Thead(html.Tr([html.Th("#", scope="col", className="row-number"),
-                            *[html.Th(name, scope="col", title=name) for name in columns]])),
+                            *[html.Th(_column_label(name,index),scope="col",title=name or "Cabeçalho vazio no arquivo original")
+                              for index,name in enumerate(columns)]])),
         html.Tbody([html.Tr([html.Td(format_int(offset + number + 1), className="row-number"),
                             *[html.Td(row[name], title=row[name]) for name in columns]])
                     for number, row in enumerate(result["rows"])]),
@@ -101,20 +134,34 @@ def render_table(result):
 
 
 def register_callbacks(app, scope):
+    if scope=="flood":
+        @app.callback(Output("flood-dataset","options"),Output("flood-dataset","value"),
+                      Output("flood-uf","disabled"),Output("flood-catalog-count","children"),
+                      Input("flood-family","value"),Input("flood-uf","value"),State("flood-dataset","value"))
+        def choose_content(family,uf,current):
+            family=family if family in FAMILIES else "ocorrencias"
+            uf=uf if uf in STATES or uf=="all" else "SP"
+            keys=dataset_keys("flood",family,uf)
+            count=f"{len(keys)} arquivos de estações · "+("Brasil" if uf=="all" else uf) if family=="inmet" else (
+                "Ocorrências oficiais de alagamento e inundação na capital paulista." if family=="ocorrencias" else
+                "Duas bases municipais: setembro e outubro de 2025 · estado de São Paulo.")
+            return _dataset_options(keys),current if current in keys else keys[0],family!="inmet",count
+
     @app.callback(
         Output(f"{scope}-search-column", "options"), Output(f"{scope}-search-column", "value"),
         Output(f"{scope}-sort", "options"), Output(f"{scope}-sort", "value"),
         Output(f"{scope}-table-title", "children"), Output(f"{scope}-meta", "children"),
-        Output(f"{scope}-download", "href"), Input(f"{scope}-dataset", "value"),
+        Output(f"{scope}-download", "href"), Output(f"{scope}-file","children"),
+        Output(f"{scope}-table-note","children"), Input(f"{scope}-dataset", "value"),
     )
     def update_dataset(key):
         if key not in DATASETS or DATASETS[key]["group"] != scope:
             key = next(key for key, value in DATASETS.items() if value["group"] == scope)
         meta = metadata(key)
-        fields = [{"label": name, "value": name} for name in meta["columns"]]
+        fields = _column_options(meta["columns"])
         return ([{"label": "Todos os campos", "value": "__all__"}, *fields], "__all__",
                 [{"label": "Ordem original", "value": "__original__"}, *fields], "__original__",
-                meta["title"], _meta_text(meta), f"/download/{key}")
+                meta["title"], _meta_text(meta), f"/download/{key}",meta["source"],meta.get("table_note",""))
 
     @app.callback(
         Output(f"{scope}-table", "children"), Output(f"{scope}-range", "children"),

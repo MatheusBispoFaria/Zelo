@@ -7,45 +7,37 @@ from shared.components import icon
 
 def layout():
     return html.Div([
-        html.Section([
+        html.Header([
             html.Div([html.Span(className="status-dot"), "Assistente virtual para o cidadão"], className="eyebrow"),
             html.H1(["Toda consulta importa. ", html.Em("Todo cidadão também.")]),
             html.P("O Zelo propõe apoiar o acompanhamento de consultas no SUS, com avisos de enchentes. Explore as bases públicas do estudo de caso.",
                    className="description home-description"),
-            html.Div([
-                _area("Saúde", "Faltas, espera por exames, hospitais, leitos, ouvidoria e telessaúde.",
-                      "Consultar dados do SUS", "/saude", "health", "Fontes estaduais, municipais e federais"),
-                _area("Enchentes", "Chuva acumulada e índices de precipitação por município.",
-                      "Consultar dados de chuva", "/enchentes", "water", "Setembro e outubro de 2025"),
-                _area("Visão geral", "Saúde e enchentes reunidas na mesma tela.",
-                      "Abrir visão geral", "/geral", "general", "Análises de saúde e chuva"),
-            ], className="area-grid"),
-        ], className="panel welcome-panel"),
-        html.Section([
-            html.Div([html.Div([icon("table", "#298f79"), html.H2("Uma consulta mais próxima dos dados")], className="section-heading"),
-                      html.Span("Como explorar", className="small-badge")], className="panel-heading"),
-            html.Div([
-                _step("01", "Escolha uma base", "As abas reúnem os arquivos de cada área e seus períodos de referência."),
-                _step("02", "Encontre um registro", "Use a busca, altere a ordenação e percorra as páginas da tabela."),
-                _step("03", "Consulte o arquivo completo", "Baixe o CSV da base selecionada para avaliar todos os campos."),
-            ], className="steps"),
-        ], className="panel guide-panel"),
+        ], className="home-intro"),
+        html.Div([
+            html.P("Passe o mouse ou use o teclado para explorar. No celular, toque para revelar e toque novamente para abrir.",
+                   className="description home-explore-hint"),
+            html.Nav([
+                _portal("Saúde", "Faltas, espera por exames e acesso ao SUS nas bases públicas.",
+                        "/saude", "health", "health"),
+                _portal("Enchentes", "Ocorrências de alagamento, inundações e registros de chuva.",
+                        "/enchentes", "water", "flood"),
+                _portal("Visão geral", "Explore as perguntas do estudo com gráficos e filtros.",
+                        "/geral", "general", "general"),
+                _portal("Simulador", "Receba um alerta e acompanhe uma rota que evita as áreas alagadas.",
+                        "/simulador", "alert", "simulator"),
+            ],className="home-portals",**{"aria-label":"Áreas do Zelo"}),
+        ],className="home-explore"),
         html.Div([icon("check", "#299d81"), html.Span("Conteúdo original preservado"),
                   html.Span("Os arquivos compactados mantêm todos os registros das bases públicas.", className="description")],
                  className="integrity-note"),
     ], className="home-page")
 
 
-def _area(title, description, action, href, symbol, period):
+def _portal(title, description, href, symbol, tone):
     return dcc.Link([
-        html.Div([html.Span(icon(symbol, "#24997d"), className="area-symbol"),
-                  icon("arrow", "#7b91a1")], className="area-top"),
-        html.H2(title), html.P(description, className="description"),
-        html.Span(period, className="description area-period"),
-        html.Span([action, icon("chevron-right", "#20886f")], className="area-action"),
-    ], href=href, className="area-card")
-
-
-def _step(number, title, description):
-    return html.Div([html.Span(number, className="step-number"),
-                     html.Div([html.Strong(title), html.P(description, className="description")])], className="step")
+        html.Span(icon(symbol,"#173c32" if tone in ("general","simulator") else "#f0f5ea"),className="portal-symbol"),
+        html.Div([html.H2(title),
+                  html.P(description,id=f"home-intro-{tone}",className="description"),
+                  html.Span(["Explorar",icon("arrow","#173c32" if tone in ("general","simulator") else "#f0f5ea")],
+                            className="portal-action")],className="portal-copy"),
+    ],href=href,className=f"home-portal portal-{tone}",id=f"home-{tone}")
