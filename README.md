@@ -34,7 +34,10 @@ visíveis porque descrevem dispersão, não confiança.
 
 O menu lateral começa recolhido. Passar o mouse na borda esquerda destaca o botão
 do menu e mostra **Clique no Menu para expandir**. A dica também aparece ao focar
-o botão pelo teclado; a expansão acontece pelo clique.
+o botão pelo teclado; a expansão acontece pelo clique. A barra desliza ao abrir
+e recolher. Páginas e pop-ups têm transições curtas; Escape, clique fora e a
+restauração do foco continuam disponíveis. A preferência de movimento reduzido
+desativa as animações.
 
 O **Simulador de alerta** demonstra um aviso de alagamento, com mapa, celular
 animado, som breve e uma rota calculada por Dijkstra até um abrigo fictício.
@@ -56,6 +59,7 @@ gs_zelo/
     analytics.py         recortes e métodos estatísticos, sem escrever nas bases
     flood_analysis.py    junção de ocorrências com chuva e ranking por subprefeitura
     simulation.py        cenários fictícios e algoritmo de Dijkstra
+    simulation_network.json  recorte de ruas do OpenStreetMap, sob ODbL
   assets/                estilos da interface
   data/                  bases compactadas, fontes e manifesto de integridade
     clima/inmet/2026/    estações de todas as UFs, separadas por UF
@@ -204,23 +208,45 @@ de informação e no ZIP de recortes. Detalhes em `docs/chuva-ocorrencias-dashbo
 
 ## Simulador de alerta
 
-Escolha uma das três posições hipotéticas e um cenário: alagamento localizado,
-ampliado ou origem sem caminho disponível. **Simular alerta** mostra o aviso vermelho,
+Escolha uma das três posições hipotéticas, um cenário e uma das três variações
+de contorno: núcleos dispersos, manchas alongadas ou áreas irregulares. O cenário
+pode ter alagamento localizado, ampliado ou origem sem saída. Há **três abrigos,
+A, B e C**, cada um com nove posições selecionáveis. As posições precisam ser diferentes.
+Alterar uma escolha reinicia o cenário. **Simular alerta** mostra o aviso vermelho,
 anima o celular e reproduz um som breve, que pode ser desativado. A vibração física
 depende do navegador e do aparelho; a animação também funciona no computador.
 **Repetir aviso** repete os efeitos e **Reiniciar** limpa o cenário e interrompe os efeitos.
 
 O fundo é um mapa do [OpenStreetMap](https://www.openstreetmap.org/copyright),
 exibido com [Leaflet 1.9.4](https://leafletjs.com/reference-1.9.4.html).
-Posições, rede de vias, áreas de alagamento e abrigos sobrepostos são **fictícios**,
-sem solicitar GPS. Não representam ocorrências ou abrigos confirmados, nem uma
-previsão gerada pelas bases históricas. As linhas da rede não seguem as ruas reais.
-O mapa de fundo precisa de conexão; a rede demonstrativa permanece disponível sem ele.
+O enquadramento fica limitado ao recorte do centro de São Paulo, sem arraste,
+zoom por rolagem, duplo clique, toque ou teclado. O recorte inteiro se ajusta ao
+tamanho disponível; o mapa externo à área fica oculto. O celular tem uma área
+separada e não cobre os caminhos. O fundo precisa de conexão; a rede vetorial
+continua disponível sem ele.
 
-Dijkstra remove os trechos bloqueados e minimiza o custo
-`distância em metros × (1 + 8 × risco relativo)`. O risco e seu peso são parâmetros
-didáticos, sem calibração empírica. A linha verde evita bloqueios e minimiza esse
-custo na rede; isso não valida a segurança de uma rota real. Se não houver caminho,
+As curvas e os cruzamentos vêm de um recorte público do OpenStreetMap, incluído
+em `shared/simulation_network.json`. São 1.180 nós e 1.724 trechos em uma rede
+demonstrativa a pé; as coordenadas intermediárias foram preservadas, sem atalhos
+retos entre cruzamentos. Fonte, consulta, filtros, data e hash da resposta estão
+no próprio arquivo. Dados viários: © OpenStreetMap contributors,
+[ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/).
+Não há validação operacional dos acessos, escadas ou restrições atuais.
+**Localização, áreas alagadas e abrigos são simulados**, sem GPS. Não são
+ocorrências, abrigos operacionais confirmados ou previsões das bases históricas.
+
+Dijkstra remove os trechos que entram ou tocam uma área alagada, considerando
+toda a geometria do caminho. Depois minimiza, nesta ordem:
+
+1. Soma de `distância do trecho × peso de exposição`.
+2. Distância total, somente quando a exposição é igual.
+
+Os pesos didáticos são 0,65 a menos de 35 m da área simulada, 0,30 de 35 a menos
+de 90 m e zero além disso. A proximidade considera a menor distância entre o
+trecho completo e o contorno. São faixas esquemáticas, sem probabilidade ou
+segurança calibradas. Uma rota sem exposição vence uma exposta mesmo sendo mais
+longa. Os três abrigos são comparados; o painel indica o escolhido e quais estão
+acessíveis ou sem acesso. Não se estima tempo de viagem. Se não houver caminho,
 o sistema informa **trajeto indisponível**. As bases de `data/` continuam intocadas.
 As premissas também estão no ícone de informação da tela e em `docs/simulador.md`.
 

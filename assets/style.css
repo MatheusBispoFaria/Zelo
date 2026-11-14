@@ -490,3 +490,37 @@ a:hover { color: var(--green); }
 /* As janelas de informação ficam fora da grade; nunca participam de suas medidas. */
 .analysis-dialog-host { flex: 0 0 0; height: 0; min-height: 0; }
 .overview-grid .chart-position-6 .compact-plot { width: 100%; max-width: 1180px; align-self: center; }
+
+/* Navegação: movimentos curtos sem alterar a estrutura dos cartões e diálogos. */
+.app-shell { --rail-size: 72px; transition: grid-template-columns .32s cubic-bezier(.22,.61,.36,1); }
+.sidebar { width: var(--rail-size); opacity: 1; transform: translateX(0);
+  transition: transform .32s cubic-bezier(.22,.61,.36,1), opacity .24s ease, visibility 0s; }
+.app-shell.is-collapsed .sidebar { opacity: 0; transform: translateX(-100%); visibility: hidden;
+  transition: transform .32s cubic-bezier(.22,.61,.36,1), opacity .24s ease, visibility 0s .32s; }
+.app-shell:not(.is-collapsed) .sidebar { visibility: visible; }
+.rail-link,.menu-button { transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease; }
+.menu-hint { translate: 0 -4px; transition: opacity .18s ease, translate .18s ease, visibility 0s .18s; }
+.is-collapsed:has(.sidebar-reveal-edge:hover) .menu-hint,
+.is-collapsed:has(.menu-button:hover,.menu-button:focus-visible) .menu-hint { translate: 0 0; transition-delay: 0s; }
+html { view-transition-name: none; }
+#page-content { view-transition-name: zelo-page; }
+.main-content > [data-page] { animation: zelo-page-enter .32s cubic-bezier(.22,.61,.36,1); }
+html.is-page-transitioning .main-content > [data-page] { animation: none; }
+::view-transition-group(zelo-page) { animation-duration: .3s; }
+::view-transition-old(zelo-page) { animation: zelo-page-exit .2s ease both; }
+::view-transition-new(zelo-page) { animation: zelo-page-enter .3s ease both; }
+.zelo-dialog::backdrop { animation: zelo-backdrop-enter .25s ease both; }
+.zelo-dialog.is-closing::backdrop { animation: zelo-backdrop-exit .18s ease both; }
+@keyframes zelo-page-enter { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes zelo-page-exit { to { opacity: 0; } }
+@keyframes zelo-backdrop-enter { from { background-color: #0c292500; backdrop-filter: blur(0); } }
+@keyframes zelo-backdrop-exit { to { background-color: #0c292500; backdrop-filter: blur(0); } }
+
+@media (max-width:700px) {
+  .app-shell { --rail-size: 54px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .app-shell,.sidebar,.app-shell.is-collapsed .sidebar,.rail-link,.menu-button,.menu-hint { transition: none; }
+  .main-content > [data-page],.zelo-dialog::backdrop,.zelo-dialog.is-closing::backdrop { animation: none; }
+  ::view-transition-group(*),::view-transition-old(*),::view-transition-new(*) { animation-duration: 0s !important; }
+}

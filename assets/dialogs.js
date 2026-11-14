@@ -1,5 +1,7 @@
 /* Diálogos nativos: clique fora, Escape e gerenciamento de foco do navegador. */
 (() => {
+  const motions=new WeakMap();
+  const reduced=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   // Redimensiona somente gráficos visíveis, sem disparar resize para a página inteira.
   const resizePlots = (scope) => {
     requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -26,23 +28,43 @@
     if (plot) Promise.resolve(window.Plotly.relayout(plot, JSON.parse(button.dataset.resetLayout))).catch(() => {});
   };
   const show = (dialog) => {
-    if (!(dialog instanceof HTMLDialogElement) || dialog.open) return;
-    dialog.showModal();
+    if (!(dialog instanceof HTMLDialogElement)) return;
+    if (dialog.open && !dialog.classList.contains('is-closing'))return;
+    motions.get(dialog)?.cancel();dialog.classList.remove('is-closing');
+    if(!dialog.open)dialog.showModal();
     expansionState(dialog, true);
     if (dialog.hasAttribute('data-focused-chart')) resetChart(dialog.querySelector('[data-reset-chart]'));
     resizePlots(dialog);
+    if(!reduced() && dialog.animate) {
+      const motion=dialog.animate([{opacity:0,transform:'translateY(8px) scale(.985)'},{opacity:1,transform:'none'}],
+        {duration:260,easing:'cubic-bezier(.22,.61,.36,1)'});
+      motions.set(dialog,motion);
+      motion.finished.then(()=>{
+        if(motions.get(dialog)===motion) {motions.delete(dialog);resizePlots(dialog);}
+      }).catch(()=>{});
+    }
   };
   const close = (dialog) => {
-    if (!(dialog instanceof HTMLDialogElement)) return;
-    expansionState(dialog, false);
-    dialog.close();
+    if (!(dialog instanceof HTMLDialogElement) || !dialog.open || dialog.classList.contains('is-closing')) return;
+    const opacity=getComputedStyle(dialog).opacity;
+    motions.get(dialog)?.cancel();
+    if(reduced() || !dialog.animate) {dialog.close();return;}
+    dialog.classList.add('is-closing');
+    const motion=dialog.animate([{opacity,transform:'none'},{opacity:0,transform:'translateY(5px) scale(.99)'}],
+      {duration:180,easing:'ease-in',fill:'forwards'});
+    motions.set(dialog,motion);
+    motion.finished.then(()=>{
+      if(motions.get(dialog)!==motion)return;
+      dialog.close();motion.cancel();motions.delete(dialog);dialog.classList.remove('is-closing');
+    }).catch(()=>{});
   };
   document.addEventListener('cancel', (event) => {
-    if (event.target instanceof HTMLDialogElement) expansionState(event.target, false);
+    if (event.target instanceof HTMLDialogElement) {event.preventDefault();close(event.target);}
   }, true);
   // O evento close também cobre Escape e o clique fora, sem remontar o dashboard.
   document.addEventListener('close', (event) => {
     if (event.target instanceof HTMLDialogElement) {
+      motions.get(event.target)?.cancel();motions.delete(event.target);event.target.classList.remove('is-closing');
       expansionState(event.target, false);
       resizePlots(document.getElementById('page-content'));
     }
@@ -53,6 +75,7 @@
     if (dialog) {
       show(dialog);
       if (sourceObserver) sourceObserver.disconnect();
+      sourceObserver=undefined;
     } else if (!sourceObserver) {
       sourceObserver = new MutationObserver(showSources);
       sourceObserver.observe(document.body, {childList:true, subtree:true});

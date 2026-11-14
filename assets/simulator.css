@@ -12,10 +12,23 @@ body:has(.simulator-page) .main-content { flex: 1; min-height: 0; max-width: non
   border: 1px solid #dce5dc; border-radius: 15px; overflow: auto; }
 .sim-eyebrow { color: #105d57; letter-spacing: .08em; font-size: var(--description); }
 .sim-controls h2 { margin-bottom: 0; }
+.sim-shelter-controls { display: grid; gap: 6px; margin-top: 5px; }
+.sim-control-label { font-size: var(--normal); color: #294c40; }
+.sim-shelter-control { display: flex; align-items: center; gap: 8px; }
+.sim-shelter-letter { display: inline-grid; place-items: center; width: 25px; height: 25px; flex: 0 0 25px;
+  border-radius: 50%; background: #e8f0e9; color: #315d4c; font-size: var(--description); font-weight: 700; }
+.sim-invalid { color: #b53c31 !important; }
+.sim-shelter-status { display: grid; gap: 5px; margin-top: 10px; }
+.sim-shelter-result { display: flex; align-items: center; gap: 7px; color: #526c60; font-size: var(--description); }
+.sim-shelter-result.selected { color: #087f66; font-weight: 600; }
+.sim-shelter-result.selected .sim-shelter-letter { color: white; background: #087f66; }
+.sim-shelter-result.unavailable { color: #b53c31; }
 .sim-controls > label:not(.sim-sound-option) { margin-top: 5px; font-size: var(--normal); color: #294c40; }
 .sim-select { padding: 8px 10px; min-height: 36px; color: #193e32; background: #fafcf8; border: 1px solid #d5e1d6;
   border-radius: 7px; font-size: var(--normal); width: 100%; }
 .sim-select:focus-visible { outline: 2px solid #105d57; outline-offset: 2px; }
+.sim-select,.sim-result,.sim-shelter-letter,.sim-shelter-result,.sim-map-pin {
+  transition: background-color .25s ease, border-color .25s ease, box-shadow .25s ease, color .25s ease; }
 .sim-actions { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; margin: 7px 0 2px; }
 .sim-actions .button { padding-inline: 10px; }
 .sim-actions .icon { width: 17px; height: 17px; }
@@ -31,12 +44,19 @@ body:has(.simulator-page) .main-content { flex: 1; min-height: 0; max-width: non
 .sim-metrics strong { display: block; font-size: var(--title); color: #105d57; margin-top: 2px; }
 .sim-repeat { min-height: 30px; padding-block: 5px; }
 .sim-footnote { margin-top: auto; padding-top: 3px; }
-.sim-map-stage { min-width: 0; min-height: 0; position: relative; overflow: hidden; border: 1px solid #d5dfd5;
+.sim-map-stage { display: grid; grid-template-columns: minmax(0,1fr) 242px; min-width: 0; min-height: 0; position: relative; overflow: hidden; border: 1px solid #d5dfd5;
   border-radius: 15px; isolation: isolate; background: #e8eee4; }
+.sim-map-frame { position: relative; min-width: 0; min-height: 0; overflow: hidden; }
+.sim-device-dock { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 16px 12px;
+  overflow-y: auto; overflow-x: hidden; background: #f4f6f0; border-left: 1px solid #d5dfd5; }
+.sim-priority-note { margin-top: auto; max-width: 210px; line-height: 1.5; }
 .sim-map { position: absolute; inset: 0; background-color: #e8eee4;
   background-image: linear-gradient(#dce5db 1px,transparent 1px),linear-gradient(90deg,#dce5db 1px,transparent 1px);
   background-size: 50px 50px; font: var(--normal) 'Segoe UI',Arial,sans-serif; }
 .sim-map .leaflet-control-zoom a { color: #105d57; }
+.sim-map.leaflet-container { cursor: default; }
+.sim-scene-layer { z-index: 450; isolation: isolate; }
+.sim-scene-layer.is-retiring,.sim-scene-layer.is-retiring * { pointer-events: none !important; }
 .sim-map .leaflet-tooltip { font-size: var(--normal); }
 .sim-map .leaflet-bottom.leaflet-left { bottom: 26px; }
 .sim-map .leaflet-control-attribution { font-size: var(--description); }
@@ -50,24 +70,26 @@ body:has(.simulator-page) .main-content { flex: 1; min-height: 0; max-width: non
 .sim-map-pin.user { background: #347db2; }
 .sim-map-pin.shelter { background: #426b58; }
 .sim-map-pin.selected { background: #087f66; box-shadow: 0 0 0 7px #087f6629,0 2px 10px #172e3640; }
+.sim-map-pin.unavailable { background: #9d625b; opacity: .8; }
 .sim-user-tooltip { font-size: var(--normal); border: 1px solid #bed0e2; color: #285e86; background: #fff; border-radius: 6px; padding: 5px 8px; }
 .sim-map-legend { position: absolute; left: 14px; top: 14px; z-index: 850; display: flex; flex-wrap: wrap;
   gap: 9px; padding: 8px 11px; border-radius: 8px; background: #fffffff2; box-shadow: 0 2px 12px #122f3010;
-  max-width: calc(100% - 75px); font-size: var(--description); }
+  max-width: calc(100% - 28px); font-size: var(--description); }
 .sim-map-legend span { display: inline-flex; align-items: center; gap: 5px; }
 .legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
 .legend-dot.user { background: #347db2; }
 .legend-dot.risk { background: #ce4539; }
+.legend-dot.caution { background: #c28a2c; }
 .legend-dot.route { background: #087f66; }
-.sim-alert-banner { position: absolute; top: 14px; left: 14px; right: 66px; z-index: 900; background: #bf3c32;
-  color: white; border-radius: 10px; padding: 13px 15px; box-shadow: 0 5px 20px #9d271e30; }
+.sim-map-crop-label { position: absolute; left: 14px; bottom: 60px; z-index: 800; padding: 5px 8px;
+  border-radius: 6px; background: #ffffffed; color: #3d5548; font-size: var(--description); pointer-events: none; }
+.sim-alert-banner { flex: 0 0 auto; width: 100%; background: #bf3c32;
+  color: white; border-radius: 10px; padding: 11px 12px; box-shadow: 0 5px 20px #9d271e20; overflow: hidden; }
 .sim-alert-banner strong { display: block; font-size: var(--title); margin-bottom: 3px; }
 .sim-alert-banner span { display: block; font-size: var(--normal); }
-.simulator-page[data-phase=alert] .sim-map-legend, .simulator-page[data-phase=route] .sim-map-legend,
-.simulator-page[data-phase=error] .sim-map-legend { top: calc(var(--sim-alert-height, 84px) + 28px); }
 .simulator-page[data-phase=route] .sim-status-dot { background: #087f66; }
 .simulator-page[data-route-status=unavailable] .sim-status-dot { background: #bf3c32; }
-.sim-phone { position: absolute; width: 224px; height: 400px; right: 22px; bottom: 58px; z-index: 850;
+.sim-phone { position: relative; width: 216px; max-width: 100%; height: 425px; flex: 0 0 425px; margin-top: auto;
   border: 8px solid #152b25; border-radius: 29px; background: #eaf2e8; box-shadow: 0 12px 35px #14342e45; }
 .phone-island { width: 58px; height: 12px; position: absolute; left: 50%; transform: translateX(-50%); top: 6px;
   border-radius: 10px; background: #152b25; z-index: 1; }
@@ -86,26 +108,39 @@ body:has(.simulator-page) .main-content { flex: 1; min-height: 0; max-width: non
 .phone-vibration-note { position: absolute; bottom: 15px; left: 10px; right: 10px; line-height: 1.3; }
 .phone-home-indicator { position: absolute; width: 55px; height: 3px; background: #14362b; border-radius: 4px;
   left: 50%; transform: translateX(-50%); bottom: 5px; }
-.phone-sound-wave { position: absolute; right: -25px; top: 45px; color: #bf3c32; font-size: 24px; opacity: 0; }
+.phone-sound-wave { position: absolute; right: -15px; top: 45px; color: #bf3c32; font-size: 24px; opacity: 0; }
 .simulator-page[data-phase=alert] .phone-message-title, .simulator-page[data-phase=route] .phone-message-title { color: #b53c31; }
 .is-alert .sim-phone { animation: zelo-vibrate .14s linear 11; }
 .is-alert .phone-sound-wave { animation: zelo-sound .45s ease-out 4; }
-.sim-route-line { stroke-dasharray: 14 7; animation: zelo-route 1.2s linear infinite; }
 @keyframes zelo-vibrate { 0%,100% { transform: translateX(0) rotate(0); } 25% { transform: translateX(-3px) rotate(-1deg); } 75% { transform: translateX(3px) rotate(1deg); } }
 @keyframes zelo-sound { 0% { opacity: .2; transform: translateX(-3px); } 50% { opacity: 1; } 100% { opacity: 0; transform: translateX(8px); } }
-@keyframes zelo-route { to { stroke-dashoffset: -21; } }
-@media (prefers-reduced-motion: reduce) { .is-alert .sim-phone,.is-alert .phone-sound-wave,.sim-route-line { animation: none; } }
-@media (max-width: 1050px) { .simulator-workspace { grid-template-columns: 255px minmax(0,1fr); } .sim-controls { padding: 16px; } .sim-phone { width: 210px; right: 15px; } }
+@media (prefers-reduced-motion: reduce) {
+  .is-alert .sim-phone,.is-alert .phone-sound-wave { animation: none; }
+  .sim-select,.sim-result,.sim-shelter-letter,.sim-shelter-result,.sim-map-pin { transition: none; }
+}
+@media (max-width: 1200px) { .simulator-workspace { grid-template-columns: 270px minmax(0,1fr); }
+  .sim-map-stage { grid-template-columns: minmax(0,1fr) 225px; } .sim-device-dock { padding-inline: 8px; }
+  .sim-phone { width: 207px; } }
 @media (max-width: 850px), (max-height: 620px) {
   body:has(.simulator-page) .app-shell,body:has(.simulator-page) .workspace { height: auto; min-height: 100dvh; overflow: visible; }
   body:has(.simulator-page) .main-content { overflow: visible; padding: 16px 12px; }
   .simulator-page { height: auto; }
   .simulator-workspace { display: flex; flex-direction: column; }
   .sim-controls { overflow: visible; }
-  .sim-map-stage { min-height: 590px; }
-  .sim-phone { width: 210px; height: 440px; right: 12px; bottom: 58px; }
+  .sim-map-stage { display: flex; flex-direction: column; min-height: 0; }
+  .sim-map-frame { height: 540px; flex: 0 0 540px; }
+  .sim-device-dock { display: grid; grid-template-columns: minmax(0,1fr) 216px; gap: 14px; align-items: center;
+    border-left: 0; border-top: 1px solid #d5dfd5; padding: 18px; overflow: hidden; }
+  .sim-phone { grid-column: 2; grid-row: 1 / 3; width: 210px; height: 425px; margin: 0; }
+  .sim-priority-note { grid-column: 1; align-self: start; }
   .sim-alert-banner strong { font-size: var(--title); }
-  .sim-alert-banner { right: 55px; padding: 10px; }
-  .sim-map-legend { max-width: calc(100% - 65px); }
+  .sim-alert-banner { padding: 10px; align-self: end; }
+  .sim-map-legend { max-width: calc(100% - 28px); }
   .sim-metrics { max-width: 400px; }
+}
+@media (max-width: 480px) {
+  .sim-device-dock { display: flex; padding: 18px; }
+  .sim-alert-banner,.sim-priority-note { max-width: 100%; }
+  .sim-phone { flex-basis: 425px; }
+  .sim-map-frame { height: 500px; flex-basis: 500px; }
 }

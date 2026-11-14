@@ -15,7 +15,7 @@ import simulator
 from shared.components import icon
 from shared.data_access import DATA_DIR, DATASETS, metadata
 from shared.data_view import register_callbacks
-from shared.simulation import simulate_route
+from shared.simulation import DEFAULT_SHELTERS, simulate_route
 
 
 ROOT = Path(__file__).resolve().parent
@@ -25,6 +25,13 @@ PAGES = {"/": ("Início", home.layout), "/geral": ("Visão geral", general.layou
 NAVIGATION = [("/", "Início", "home", "home"), ("/geral", "Visão geral", "general", "general"),
               ("/saude", "Saúde", "health", "health"), ("/enchentes", "Enchentes", "water", "flood"),
               ("/simulador", "Simulador", "alert", "simulator")]
+
+
+def page_view(builder, path):
+    page = builder()
+    page.key = path
+    setattr(page, "data-page", path)
+    return page
 
 
 def create_app():
@@ -62,7 +69,7 @@ def create_app():
                     dcc.Link(["Fontes e método", icon("external")], href="/geral#fontes",
                              className="source-link"),
                 ], className="topbar"),
-                html.Main(home.layout(), id="page-content", className="main-content", tabIndex=-1),
+                html.Main(page_view(home.layout, "/"), id="page-content", className="main-content", tabIndex=-1),
                 html.Footer([html.Span("Zelo"), html.Span("Dados públicos · Fontes estaduais, municipais e federais", className="description")],
                             className="app-footer"),
             ], id="app-workspace", className="workspace"),
@@ -79,12 +86,13 @@ def create_app():
         path = (pathname or "/").rstrip("/") or "/"
         if path not in PAGES:
             page = html.Section([html.H1("Página não encontrada"),
-                                 dcc.Link("Voltar para o início", href="/", className="button")], className="panel missing-page")
+                                 dcc.Link("Voltar para o início", href="/", className="button")], className="panel missing-page",
+                                key=path, **{"data-page":path})
             return (page, "Página não encontrada", "workspace", *["rail-link"] * len(NAVIGATION))
         title, view = PAGES[path]
         rails = ["rail-link active" if href == path else "rail-link" for href, *_ in NAVIGATION]
         workspace = "workspace workspace-general" if path == "/geral" else "workspace"
-        return (view(), title, workspace, *rails)
+        return (page_view(view, path), title, workspace, *rails)
 
     @application.callback(Output("app-shell", "className"), Output("menu-toggle", "aria-expanded"),
                           Output("menu-toggle", "title"), Input("menu-toggle", "n_clicks"))
@@ -100,7 +108,10 @@ def create_app():
     @application.server.get('/api/simulator/route')
     def simulator_route():
         try:
-            result = simulate_route(request.args.get('scenario','localizado'), request.args.get('origin','casa'))
+            result = simulate_route(request.args.get('scenario','localizado'), request.args.get('origin','casa'),
+                                    variant=request.args.get('variant','1'),
+                                    shelter_positions=[request.args.get(f'shelter_{letter}',default)
+                                                       for letter,default in zip('abc',DEFAULT_SHELTERS)])
         except ValueError as error:
             return jsonify({'error':str(error)}),400
         response = jsonify(result)
